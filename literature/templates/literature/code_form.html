@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        form {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
+        
+        textarea {
+            font-family: 'Courier New', monospace;
+        }
+        
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            background: #0052a3;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        
+        <!-- Hidden fields to track which parent this code belongs to -->
+        {% if chapter_id %}
+            <input type="hidden" name="chapter_id" value="{{ chapter_id }}">
+        {% endif %}
+        {% if section_id %}
+            <input type="hidden" name="section_id" value="{{ section_id }}">
+        {% endif %}
+        {% if subsection_id %}
+            <input type="hidden" name="subsection_id" value="{{ subsection_id }}">
+        {% endif %}
+        {% if subsubsection_id %}
+            <input type="hidden" name="subsubsection_id" value="{{ subsubsection_id }}">
+        {% endif %}
+        
+        <button type="submit">💾 Save Code</button>
+    </form>
+    <a href="{% url 'literature:index' %}" class="back-link">← Back to Index</a>
+</body>
+</html>

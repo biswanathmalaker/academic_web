@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Paper</title>
+</head>
+<body>
+    <h1>Add Paper (BibTeX entry)</h1>
+    <form method="post">
+        {% csrf_token %}
+        <textarea name="bibtex" rows="20" cols="80"></textarea><br>
+        <button type="submit">Save</button>
+    </form>
+    <a href="{% url 'index' %}">Back</a>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Literature App</title>
+</head>
+<body>
+    <h1>Books</h1>
+    <a href="{% url 'add_book' %}">Add Book</a> |
+    <a href="{% url 'add_chapter' %}">Add Chapter</a> |
+    <a href="{% url 'add_section' %}">Add Section</a>
+    <hr>
+
+    {% for book in books %}
+        <h2>{{ book.book_name }}</h2>
+        <p>{{ book.preface }}</p>
+        <a href="{% url 'update_book' book.id %}">Edit Book</a> |
+        <a href="{% url 'delete_book' book.id %}">Delete Book</a>
+
+        <ul>
+        {% for chapter in book.chapters.all %}
+            <li>
+                <b>{{ chapter.chapter_name }}</b> - {{ chapter.chapter_introduction }}
+                <a href="{% url 'update_chapter' chapter.id %}">Edit Chapter</a> |
+                <a href="{% url 'delete_chapter' chapter.id %}">Delete Chapter</a>
+                <ul>
+                {% for section in chapter.sections.all %}
+                    <li>
+                        {{ section.section_name }} - {{ section.section_introduction }}
+                        <a href="{% url 'update_section' section.id %}">Edit Section</a> |
+                        <a href="{% url 'delete_section' section.id %}">Delete Section</a>
+                    </li>
+                {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+        </ul>
+    {% endfor %}
+</body>
+</html>

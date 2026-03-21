@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Codes - {{ parent_name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            background: #f9f9f9;
+        }
+        
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #0066cc;
+            padding-bottom: 10px;
+        }
+        
+        .code-block {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 20px 0;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .file-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #0066cc;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .code-actions {
+            font-size: 0.9em;
+        }
+        
+        .code-actions a {
+            margin-left: 15px;
+            text-decoration: none;
+            color: #0066cc;
+        }
+        
+        .code-actions a:hover {
+            text-decoration: underline;
+        }
+        
+        .description {
+            background: #fffbea;
+            padding: 10px;
+            border-left: 4px solid #ffcc00;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+        
+        .code-content {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre;
+        }
+        
+        .metadata {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+        
+        .back-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #666;
+            color: white;
+            text-decoration: none;
+            border-radius: 3px;
+            margin: 20px 0;
+        }
+        
+        .back-link:hover {
+            background: #555;
+        }
+        
+        .no-codes {
+            background: #fff3cd;
+            color: #856404;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <h1>💻 Codes for {{ parent_name }}</h1>
+    
+    <a href="{% url 'literature:index' %}" class="back-link">← Back to Index</a>
+    
+    {% if codes %}
+        {% for code in codes %}
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="file-name">📄 {{ code.file_name }}</span>
+                    <span class="code-actions">
+                        <a href="{% url 'literature:update_code' code.id %}">✏️ Edit</a>
+                        <a href="{% url 'literature:delete_code' code.id %}" onclick="return confirm('Delete this code?')">🗑️ Delete</a>
+                    </span>
+                </div>
+                
+                {% if code.description %}
+                    <div class="description">
+                        <strong>Description:</strong> {{ code.description }}
+                    </div>
+                {% endif %}
+                
+                <div class="code-content">{{ code.code_content }}</div>
+                
+                <div class="metadata">
+                    <strong>Created:</strong> {{ code.created_at|date:"M d, Y H:i" }} | 
+                    <strong>Updated:</strong> {{ code.updated_at|date:"M d, Y H:i" }}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-codes">
+            No codes have been added yet.
+        </div>
+    {% endif %}
+    
+    <a href="{% url 'literature:index' %}" class="back-link">← Back to Index</a>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{% extends 'papers/base.html' %}
+{% block title %}Manage Notes{% endblock %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+  <div class="card bg-dark text-light p-3">
+
+    {% if editing_statement %}
+      <div class="alert alert-info">
+        Editing statement from
+        <strong>{{ editing_statement.get_section_display }}</strong>
+      </div>
+    {% endif %}
+
+    <form method="post" id="statementForm">
+      {% csrf_token %}
+      {{ form|crispy }}
+
+      <button type="submit" class="btn btn-primary mt-3">Save Statement</button>
+    </form>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  $("#id_citations").select2({
+    width: '100%',
+    theme: 'bootstrap-5'
+  });
+</script>
+{% endblock %}

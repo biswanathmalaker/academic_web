@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Statements by Topic</title>
+
+    <style>
+        body {
+            font-family: "Times New Roman", serif;
+            margin: 2cm;
+            line-height: 1.5;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        h2 {
+            border-bottom: 2px solid #000;
+            margin-top: 2em;
+            padding-bottom: 0.3em;
+        }
+
+        .statement {
+            margin-bottom: 1.2em;
+        }
+
+        .meta {
+            font-size: 0.9em;
+            color: #333;
+        }
+
+        .paper {
+            font-weight: bold;
+        }
+
+        .section {
+            font-style: italic;
+        }
+
+        .text {
+            margin-top: 0.3em;
+        }
+
+        .citations {
+            font-size: 0.9em;
+        }
+
+        /* Print controls */
+        .controls {
+            text-align: center;
+            margin-bottom: 2em;
+        }
+
+        @media print {
+            .controls {
+                display: none;
+            }
+
+            body {
+                margin: 1.5cm;
+            }
+
+            h2 {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="controls">
+    <button onclick="window.print()">🖨 Print / Save PDF</button>
+</div>
+
+<h1>Statements Grouped by Topic</h1>
+
+{% for topic in topics %}
+    {% if topic.sorted_statements %}
+        <h2>{{ topic.name }}</h2>
+
+        {% if topic.description %}
+            <p><em>{{ topic.description }}</em></p>
+        {% endif %}
+
+        {% for stmt in topic.sorted_statements %}
+            <div class="statement">
+                <div class="meta">
+                    <span class="paper">
+                        {{ stmt.paper.citation }}
+                    </span>
+                    —
+                    <span class="section">
+                        {{ stmt.get_section_display }}
+                    </span>
+                    {% if stmt.page_number %}
+                        , p. {{ stmt.page_number }}
+                    {% endif %}
+                </div>
+
+                <div class="text">
+                    {{ stmt.text }}
+                </div>
+
+                {% if stmt.citations.all %}
+                    <div class="citations">
+                        <strong>Cites:</strong>
+                        {% for c in stmt.citations.all %}
+                            {{ c.citation }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endfor %}
+
+</body>
+</html>

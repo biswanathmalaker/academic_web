@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Literature App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .draggable-chapter, .draggable-section, .draggable-subsection, .draggable-subsubsection {
+            cursor: move;
+            padding: 10px;
+            margin: 5px 0;
+            background: #f0f0f0;
+            border-radius: 4px;
+            border-left: 4px solid #666;
+        }
+        
+        .draggable-section {
+            background: #f5f5f5;
+            border-left-color: #888;
+        }
+        
+        .draggable-subsection {
+            background: #fafafa;
+            border-left-color: #aaa;
+        }
+        
+        .draggable-subsubsection {
+            background: #fdfdfd;
+            border-left-color: #ccc;
+        }
+        
+        .sortable-ghost {
+            opacity: 0.4;
+            background: #c8ebfb;
+        }
+        
+        .chapter-list, .section-list, .subsection-list, .subsubsection-list {
+            list-style: none;
+            padding-left: 20px;
+        }
+        
+        .action-links {
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .action-links a {
+            margin-right: 10px;
+            text-decoration: none;
+            color: #0066cc;
+        }
+        
+        .action-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .view-codes-link {
+            color: #009900;
+            font-weight: bold;
+        }
+        
+        .code-count {
+            background: #009900;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+        
+        h1, h2 {
+            color: #333;
+        }
+        
+        .top-actions {
+            background: #e8e8e8;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+</head>
+<body>
+    <h1>Literature Management System</h1>
+    
+    <div class="top-actions">
+        <a href="{% url 'literature:add_book' %}">➕ Add Book</a> |
+        <a href="{% url 'literature:add_chapter' %}">➕ Add Chapter</a> |
+        <a href="{% url 'literature:add_section' %}">➕ Add Section</a> |
+        <a href="{% url 'literature:add_subsection' %}">➕ Add Subsection</a> |
+        <a href="{% url 'literature:add_subsubsection' %}">➕ Add SubSubsection</a>
+    </div>
+    <hr>
+
+    {% for book in books %}
+        <h2>📚 {{ book.book_name }}</h2>
+        <p>{{ book.preface }}</p>
+        <div class="action-links">
+            <a href="{% url 'literature:update_book' book.id %}">✏️ Edit Book</a>
+            <a href="{% url 'literature:delete_book' book.id %}" onclick="return confirm('Are you sure you want to delete this book and all its content?')">🗑️ Delete Book</a>
+            <a href="{% url 'literature:add_chapter' %}?book={{ book.id }}">➕ Add Chapter</a>
+        </div>
+
+        <ul class="chapter-list" id="chapter-list-{{ book.id }}" data-book-id="{{ book.id }}">
+        {% for chapter in book.chapters.all %}
+            <li class="draggable-chapter" data-chapter-id="{{ chapter.id }}">
+                <b>Chapter: {{ chapter.chapter_name }}</b>
+                {% if chapter.codes.count > 0 %}
+                    <span class="code-count">{{ chapter.codes.count }} code(s)</span>
+                {% endif %}
+                <br>
+                <small>{{ chapter.chapter_introduction }}</small>
+                <div class="action-links">
+                    <a href="{% url 'literature:update_chapter' chapter.id %}">✏️ Edit</a>
+                    <a href="{% url 'literature:delete_chapter' chapter.id %}" onclick="return confirm('Delete this chapter and all its content?')">🗑️ Delete</a>
+                    <a href="{% url 'literature:add_section' %}?chapter={{ chapter.id }}">➕ Add Section</a>
+                    <a href="{% url 'literature:add_code' %}?chapter={{ chapter.id }}">💻 Add Code</a>
+                    {% if chapter.codes.count > 0 %}
+                        <a href="{% url 'literature:view_codes' %}?chapter={{ chapter.id }}" class="view-codes-link">👁️ View Codes</a>
+                    {% endif %}
+                </div>
+                
+                <ul class="section-list" id="section-list-{{ chapter.id }}" data-chapter-id="{{ chapter.id }}">
+                {% for section in chapter.sections.all %}
+                    <li class="draggable-section" data-section-id="{{ section.id }}">
+                        <b>Section: {{ section.section_name }}</b>
+                        {% if section.codes.count > 0 %}
+                            <span class="code-count">{{ section.codes.count }} code(s)</span>
+                        {% endif %}
+                        <br>
+                        <small>{{ section.section_introduction }}</small>
+                        <div class="action-links">
+                            <a href="{% url 'literature:update_section' section.id %}">✏️ Edit</a>
+                            <a href="{% url 'literature:delete_section' section.id %}" onclick="return confirm('Delete this section and all its content?')">🗑️ Delete</a>
+                            <a href="{% url 'literature:add_subsection' %}?section={{ section.id }}">➕ Add Subsection</a>
+                            <a href="{% url 'literature:add_code' %}?section={{ section.id }}">💻 Add Code</a>
+                            {% if section.codes.count > 0 %}
+                                <a href="{% url 'literature:view_codes' %}?section={{ section.id }}" class="view-codes-link">👁️ View Codes</a>
+                            {% endif %}
+                        </div>
+                        
+                        <ul class="subsection-list" id="subsection-list-{{ section.id }}" data-section-id="{{ section.id }}">
+                        {% for subsection in section.subsections.all %}
+                            <li class="draggable-subsection" data-subsection-id="{{ subsection.id }}">
+                                <b>Subsection: {{ subsection.subsection_name }}</b>
+                                {% if subsection.codes.count > 0 %}
+                                    <span class="code-count">{{ subsection.codes.count }} code(s)</span>
+                                {% endif %}
+                                <br>
+                                <small>{{ subsection.subsection_introduction }}</small>
+                                <div class="action-links">
+                                    <a href="{% url 'literature:update_subsection' subsection.id %}">✏️ Edit</a>
+                                    <a href="{% url 'literature:delete_subsection' subsection.id %}" onclick="return confirm('Delete this subsection and all its content?')">🗑️ Delete</a>
+                                    <a href="{% url 'literature:add_subsubsection' %}?subsection={{ subsection.id }}">➕ Add SubSubsection</a>
+                                    <a href="{% url 'literature:add_code' %}?subsection={{ subsection.id }}">💻 Add Code</a>
+                                    {% if subsection.codes.count > 0 %}
+                                        <a href="{% url 'literature:view_codes' %}?subsection={{ subsection.id }}" class="view-codes-link">👁️ View Codes</a>
+                                    {% endif %}
+                                </div>
+                                
+                                <ul class="subsubsection-list" id="subsubsection-list-{{ subsection.id }}" data-subsection-id="{{ subsection.id }}">
+                                {% for subsubsection in subsection.subsubsections.all %}
+                                    <li class="draggable-subsubsection" data-subsubsection-id="{{ subsubsection.id }}">
+                                        <b>SubSubsection: {{ subsubsection.subsubsection_name }}</b>
+                                        {% if subsubsection.codes.count > 0 %}
+                                            <span class="code-count">{{ subsubsection.codes.count }} code(s)</span>
+                                        {% endif %}
+                                        <br>
+                                        <small>{{ subsubsection.subsubsection_introduction }}</small>
+                                        <div class="action-links">
+                                            <a href="{% url 'literature:update_subsubsection' subsubsection.id %}">✏️ Edit</a>
+                                            <a href="{% url 'literature:delete_subsubsection' subsubsection.id %}" onclick="return confirm('Delete this subsubsection?')">🗑️ Delete</a>
+                                            <a href="{% url 'literature:add_code' %}?subsubsection={{ subsubsection.id }}">💻 Add Code</a>
+                                            {% if subsubsection.codes.count > 0 %}
+                                                <a href="{% url 'literature:view_codes' %}?subsubsection={{ subsubsection.id }}" class="view-codes-link">👁️ View Codes</a>
+                                            {% endif %}
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                                </ul>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+        </ul>
+        <hr>
+    {% endfor %}
+
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        // Initialize drag and drop for chapters
+        document.querySelectorAll('.chapter-list').forEach(function(chapterList) {
+            new Sortable(chapterList, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                handle: '.draggable-chapter',
+                onEnd: function(evt) {
+                    const chapterIds = Array.from(chapterList.children).map(function(li) {
+                        return li.getAttribute('data-chapter-id');
+                    });
+                    
+                    fetch("{% url 'literature:reorder_chapters' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: JSON.stringify({ chapter_ids: chapterIds })
+                    });
+                }
+            });
+        });
+
+        // Initialize drag and drop for sections
+        document.querySelectorAll('.section-list').forEach(function(sectionList) {
+            new Sortable(sectionList, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                handle: '.draggable-section',
+                onEnd: function(evt) {
+                    const sectionIds = Array.from(sectionList.children).map(function(li) {
+                        return li.getAttribute('data-section-id');
+                    });
+                    
+                    fetch("{% url 'literature:reorder_sections' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: JSON.stringify({ section_ids: sectionIds })
+                    });
+                }
+            });
+        });
+
+        // Initialize drag and drop for subsections
+        document.querySelectorAll('.subsection-list').forEach(function(subsectionList) {
+            new Sortable(subsectionList, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                handle: '.draggable-subsection',
+                onEnd: function(evt) {
+                    const subsectionIds = Array.from(subsectionList.children).map(function(li) {
+                        return li.getAttribute('data-subsection-id');
+                    });
+                    
+                    fetch("{% url 'literature:reorder_subsections' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: JSON.stringify({ subsection_ids: subsectionIds })
+                    });
+                }
+            });
+        });
+
+        // Initialize drag and drop for subsubsections
+        document.querySelectorAll('.subsubsection-list').forEach(function(subsubsectionList) {
+            new Sortable(subsubsectionList, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                handle: '.draggable-subsubsection',
+                onEnd: function(evt) {
+                    const subsubsectionIds = Array.from(subsubsectionList.children).map(function(li) {
+                        return li.getAttribute('data-subsubsection-id');
+                    });
+                    
+                    fetch("{% url 'literature:reorder_subsubsections' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: JSON.stringify({ subsubsection_ids: subsubsectionIds })
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
