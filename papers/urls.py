@@ -1,5 +1,9 @@
 from django.urls import path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
+
+
 app_name='papers'
 
 urlpatterns = [
@@ -24,6 +28,5 @@ urlpatterns = [
         "statements/by-topic/print/",
         views.statements_by_topic,
         name="statements_by_topic_print"
-    )
+    ),
 ]
-

@@ -1,7 +1,0 @@
-<h3>Delete Statement</h3>
-<p>Are you sure you want to delete: "{{ statement.text }}"?</p>
-<form method="post">
-  {% csrf_token %}
-  <button type="submit">Yes, delete</button>
-  <a href="{% url 'statement_list' %}">Cancel</a>
-</form>
