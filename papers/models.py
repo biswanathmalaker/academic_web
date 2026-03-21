@@ -1,6 +1,18 @@
 import re
 from django.db import models
 
+
+class Category(models.Model):
+    """
+    Broader classifications like: Flares, Jets, Nebula, Star_Formation.
+    """
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(unique=True, blank=True) # Useful for clean Web URLs
+
+    def __str__(self):
+        return self.name
+    
+    
 class Paper(models.Model):
     key = models.CharField(max_length=100, unique=True)   # BibTeX/citation key
     title = models.TextField(blank=True, null=True)
@@ -129,15 +141,7 @@ class Statement(models.Model):
 
     
 
-class Category(models.Model):
-    """
-    Broader classifications like: Flares, Jets, Nebula, Star_Formation.
-    """
-    name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(unique=True, blank=True) # Useful for clean Web URLs
 
-    def __str__(self):
-        return self.name
 
 
 
