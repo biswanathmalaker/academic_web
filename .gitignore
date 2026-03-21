@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 migrations/
 __init__.py
+*.json
 
 
 academic_web/
