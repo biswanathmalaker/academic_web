@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>All Papers</title>
+  <style>
+    body { font-family: monospace; white-space: pre-wrap; margin: 40px; }
+    .download { display: inline-block; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <a href="{% url 'papers:all_papers_pdf' %}" class="download">Download as PDF</a>
+
+  {% for paper in papers %}
+  {{ forloop.counter }}. {{ paper.title|default:"(No Title)" }}
+  Authors: {{ paper.authors }}
+  Year: {{ paper.year }}
+  {% if paper.journal %}Journal: {{ paper.journal }}{% endif %}
+  Abstract:
+  {{ paper.abstract|default:"No abstract available." }}
+
+  ----------------------------------------------------------
+  {% endfor %}
+</body>
+</html>
