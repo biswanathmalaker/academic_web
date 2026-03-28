@@ -187,3 +187,7 @@ Because this project uses custom logic for IDs and ContentTypes, it is critical 
 Excludes internal Django management tables (auth, contenttypes) to ensure the fixture remains "pure" app data.
 ```bash
 python3 manage.py dumpdata papers literature --indent 2 --exclude auth --exclude contenttypes > academic_data_clean.json
+
+### Clean Data Load
+```bash
+python3 manage.py loaddata academic_data_clean.json
