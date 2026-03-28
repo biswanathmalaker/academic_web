@@ -5,6 +5,152 @@
 
 ---
 
+# Academic Web
+
+A Django-based web application for managing and showcasing academic papers and literature.
+
+---
+
+## Requirements
+
+- Python 3.8+
+- pip
+
+---
+
+## Installation
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/biswanathmalaker/academic_web.git
+cd academic_web
+```
+
+### 2. Create and activate a virtual environment
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Project Structure
+
+The project consists of three Django apps:
+
+| App | Purpose |
+|---|---|
+| `home` | Landing page and general site navigation |
+| `papers` | Manage and display academic papers |
+| `literature` | Manage and display literature references |
+
+---
+
+## Configuration
+
+### URL Routing (`academic_web/urls.py`)
+
+```python
+from django.contrib import admin
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path("", include("home.urls")),
+    path("papers/", include("papers.urls")),
+    path("literature/", include("literature.urls")),
+]
+
+urlpatterns += static('/papers/pdf/', document_root=settings.BASE_DIR / 'papers/pdf')
+```
+
+### Installed Apps (`academic_web/settings.py`)
+
+Ensure the following apps are listed under `INSTALLED_APPS`:
+
+```python
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'papers',
+    'home',
+    'literature',
+]
+```
+
+---
+
+## Database Setup
+
+After creating (or updating) the apps, run migrations:
+
+```bash
+python3 manage.py makemigrations papers literature home
+python3 manage.py migrate
+```
+
+---
+
+## Running the Development Server
+
+```bash
+python3 manage.py runserver 8080
+```
+
+The application will be available at **http://127.0.0.1:8080**
+
+---
+
+## Adding Papers
+
+Papers can be added via the Django admin panel at **http://127.0.0.1:8080/admin**.
+
+Each paper is automatically assigned a unique ID based on the author's name and year — for example:
+
+```
+malaker-2024
+malaker-2024a
+malaker-2024b
+...
+```
+
+### Attaching PDF Files
+
+To serve a paper's PDF, place the file inside the `papers/pdf/` directory, naming it after the paper's unique ID:
+
+```
+papers/
+└── pdf/
+    ├── malaker-2024.pdf
+    ├── malaker-2024a.pdf
+    └── ...
+```
+
+The PDFs will be served at `/papers/pdf/<paper-id>.pdf`.
+
+---
+
+## License
+
+This project is open source. See the repository for license details.
+
+
+---
+
 ## 🌟 Core Modules
 
 ### 1. 📚 Papers App (Research Intelligence)
