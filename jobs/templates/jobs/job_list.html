@@ -1,0 +1,89 @@
+<style>
+    :root {
+        --primary-color: #2c3e50;
+        --accent-color: #3498db;
+        --danger-color: #e74c3c;
+        --success-color: #27ae60;
+        --bg-light: #f8f9fa;
+    }
+
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; line-height: 1.6; }
+
+    .container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+
+    .header-flex { 
+        display: flex; justify-content: space-between; align-items: center; 
+        margin-bottom: 2rem; border-bottom: 2px solid var(--bg-light); padding-bottom: 1rem;
+    }
+
+    h2 { color: var(--primary-color); margin: 0; }
+
+    .btn-add {
+        background-color: var(--accent-color); color: white; padding: 0.6rem 1.2rem;
+        text-decoration: none; border-radius: 5px; font-weight: bold; transition: opacity 0.2s;
+    }
+    .btn-add:hover { opacity: 0.9; }
+
+    .job-table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+    
+    .job-table thead { background-color: var(--primary-color); color: white; }
+    
+    .job-table th, .job-table td { padding: 1rem; text-align: left; border-bottom: 1px solid #eee; }
+
+    .job-table tr:hover { background-color: #f1f7fd; }
+
+    .deadline-badge {
+        padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;
+    }
+    .expired { background-color: #ffdce0; color: var(--danger-color); }
+    .upcoming { background-color: #d4edda; color: var(--success-color); }
+
+    .link-icon { color: var(--accent-color); text-decoration: none; font-weight: 500; }
+    .link-icon:hover { text-decoration: underline; }
+
+    .empty-state { text-align: center; padding: 3rem; color: #777; font-style: italic; }
+</style>
+
+<div class="container">
+    <div class="header-flex">
+        <h2>Upcoming Postdoc Deadlines</h2>
+        <a href="{% url 'jobs:position_add' %}" class="btn-add">+ Add Position</a>
+    </div>
+
+    <table class="job-table">
+        <thead>
+            <tr>
+                <th>Position Title</th>
+                <th>Institution</th>
+                <th>Deadline</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job in positions %}
+            <tr>
+                <td><strong>{{ job.title }}</strong></td>
+                <td>{{ job.institution }}</td>
+                <td>
+                    {% if job.deadline %}
+                        <span class="deadline-badge {% if job.deadline < today %}expired{% else %}upcoming{% endif %}">
+                            {{ job.deadline|date:"M d, Y" }}
+                        </span>
+                    {% else %}
+                        <span class="deadline-badge" style="background: #eee;">Rolling Basis</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ job.job_url }}" target="_blank" class="link-icon">
+                        View Ad &#8599;
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="empty-state">No positions tracked yet. Get started by adding one!</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

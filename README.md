@@ -89,7 +89,31 @@ INSTALLED_APPS = [
     'papers',
     'home',
     'literature',
+    'jobs',
+    'arxivpapers',
+    'crispy_forms',
+    'crispy_bootstrap5',
+    'django_q',
 ]
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+
+# Django-Q Configuration (Using Django ORM as the broker)
+Q_CLUSTER = {
+    'name': 'ArxivSync',
+    'workers': 4,
+    'recycle': 500,
+    'timeout': 60,
+    'compress': True,
+    'save_limit': 250,
+    'queue_limit': 50,
+    'label': 'Django Q',
+    'orm': 'default', # Use your existing DB for the queue
+}
+
 ```
 
 ---
@@ -166,6 +190,19 @@ The Literature module provides a hierarchical framework for drafting your own bo
     `Book` → `Chapter` → `Section` → `Subsection` → `SubSubsection`.
 * **Integrated Code snippets:** Attach `Code` objects directly to any level of the hierarchy. Perfect for keeping simulation code or data analysis scripts right next to the text that explains them.
 * **Logical Ordering:** Every level includes an `order` field to ensure your Table of Contents remains consistent regardless of the order in which you input data.
+
+
+
+### 3.  Jobs app (Research Intelligence)
+Links of various job searches
+* **Job Search links:** Various links can be appended to search available jobs
+
+### 4. Arxiv of Papers (stellar physics ; change search variable in services if you want different branch)
+Arxiv  papers can be found , updated.
+* **When using for the first time:**  If using for the first time,use the following link http://127.0.0.1:port_number/arxivpapers/sync/
+
+
+
 
 ---
 

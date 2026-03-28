@@ -1,0 +1,44 @@
+{% extends "arxivpapers/base.html" %}
+
+{% block content %}
+
+<style>
+body {
+    background-color: #121212 !important;
+    color: #e0e0e0 !important;
+    background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+    background-attachment: fixed;
+}
+.card {
+    background-color: #1e1e1e !important;
+    border: 1px solid #333 !important;
+}
+.accordion-item,
+.accordion-button {
+    background-color: #252525 !important;
+    color: #b0b0b0 !important;
+}
+.accordion-button:not(.collapsed) {
+    color: #0d6efd !important;
+    background-color: #2a2a2a !important;
+}
+.text-muted {
+    color: #a0a0a0 !important;
+}
+</style>
+
+{% include "arxivpapers/_papers_list.html" %}
+
+<script>
+window.MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+};
+
+document.addEventListener('shown.bs.collapse', function (e) {
+    if (window.MathJax) {
+        MathJax.typesetPromise([e.target]);
+    }
+});
+</script>
+
+{% endblock %}

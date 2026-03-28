@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary: #2c3e50;
+        --accent: #3498db;
+        --bg-shade: #f8f9fa;
+        --card-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .dashboard-container {
+        max-width: 1100px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    /* Top Navigation Section */
+    .top-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 3rem;
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: var(--card-shadow);
+    }
+
+    .btn-main {
+        background: var(--accent);
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: transform 0.2s;
+    }
+    .btn-main:hover { transform: translateY(-2px); }
+
+    /* Heading Styles */
+    .section-title {
+        color: var(--primary);
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-title::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #ddd;
+    }
+
+    /* Grid Layout for Links */
+    .link-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.25rem;
+    }
+
+    .link-card {
+        background: white;
+        padding: 1.2rem;
+        border-radius: 10px;
+        border: 1px solid #edf2f7;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: var(--card-shadow);
+    }
+
+    .link-card:hover {
+        border-color: var(--accent);
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.15);
+        transform: scale(1.02);
+    }
+
+    .link-text {
+        color: #4a5568;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .link-card:hover .link-text {
+        color: var(--accent);
+    }
+
+    .external-icon {
+        color: #cbd5e0;
+        font-size: 0.8rem;
+    }
+
+    /* Empty state placeholders */
+    .placeholder {
+        opacity: 0.4;
+        border-style: dashed;
+    }
+</style>
+
+<div class="dashboard-container">
+    
+    <div class="top-nav">
+        <h2 style="margin:0; color: var(--primary);">Researcher Workspace</h2>
+        <a href="{% url 'jobs:position_list' %}" class="btn-main">📂 View Saved Positions</a>
+    </div>
+
+    <h3 class="section-title">Job Registries & Repositories</h3>
+    
+    <div class="link-grid">
+        <a href="https://inspirehep.net/jobs?sort=mostrecent&size=250&page=1&status=open&field_of_interest=astro-ph&rank=POSTDOC" target="_blank" class="link-card">
+            <span class="link-text">InspireHEP (Astro-ph)</span>
+            <span class="external-icon">↗</span>
+        </a>
+
+        <a href="https://aas.org/jobregister?f%5B0%5D=category%3A511" target="_blank" class="link-card">
+            <span class="link-text">AAS Job Register</span>
+            <span class="external-icon">↗</span>
+        </a>
+
+        <a href="https://eas.unige.ch/jobs.jsp" target="_blank" class="link-card">
+            <span class="link-text">EAS Job Registry</span>
+            <span class="external-icon">↗</span>
+        </a>
+
+        <a href="https://academicjobsonline.org/ajo" target="_blank" class="link-card">
+            <span class="link-text">Academic Jobs Online</span>
+            <span class="external-icon">↗</span>
+        </a>
+
+        <a href="https://solarnews.aas.org/2026/" target="_blank" class="link-card">
+            <span class="link-text">Solar News (2026)</span>
+            <span class="external-icon">↗</span>
+        </a>
+
+        <a href="https://uksolphys.org/news/jobs/" target="_blank" class="link-card">
+            <span class="link-text">UK Solar Physics</span>
+            <span class="external-icon">↗</span>
+        </a>
+
+        <a href="https://www.mps.mpg.de/career/jobs" target="_blank" class="link-card">
+            <span class="link-text">Max Planck (Solar)</span>
+            <span class="external-icon">↗</span>
+        </a>
+
+        <a href="https://helioshine.org/category/jobs/" target="_blank" class="link-card">
+            <span class="link-text">HelioShine Opportunities</span>
+            <span class="external-icon">↗</span>
+        </a>
+
+        <a href="https://www.indussolphy.org/opportunities" target="_blank" class="link-card">
+            <span class="link-text">Indus Solar Physics</span>
+            <span class="external-icon">↗</span>
+        </a>
+
+        <a href="https://www.astron-soc.in/index.php/list-of-jobs/postdoc" target="_blank" class="link-card">
+            <span class="link-text">ASI Jobs (India)</span>
+            <span class="external-icon">↗</span>
+        </a>
+
+        <a href="https://aas.org/jobregister/ad/1d6b0b4a" target="_blank" class="link-card">
+            <span class="link-text">NASA GSFC Openings</span>
+            <span class="external-icon">↗</span>
+        </a>
+
+        <a href="https://jobs.physicstoday.org/jobs/astronomy-astrophysics-and-space-science/#browsing" target="_blank" class="link-card">
+            <span class="link-text">Physics Today Jobs</span>
+            <span class="external-icon">↗</span>
+        </a>
+
+        <a href="https://cosparhq.cnes.fr/employment/" target="_blank" class="link-card">
+            <span class="link-text">COSPAR Employment</span>
+            <span class="external-icon">↗</span>
+        </a>
+
+        <a href="https://blogs.helsinki.fi/spacephysics/category/job_openings/" target="_blank" class="link-card">
+            <span class="link-text">Helsinki Space Physics</span>
+            <span class="external-icon">↗</span>
+        </a>
+
+        <div class="link-card placeholder">
+            <span class="link-text">Add New Source...</span>
+        </div>
+    </div>
+</div>
+{% endblock %}

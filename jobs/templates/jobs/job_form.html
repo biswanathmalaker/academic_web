@@ -1,0 +1,128 @@
+<style>
+    :root {
+        --primary-color: #2c3e50;
+        --accent-color: #3498db;
+        --bg-light: #f4f7f6;
+        --border-color: #dcdde1;
+    }
+
+    .form-container {
+        max-width: 600px;
+        margin: 3rem auto;
+        padding: 2.5rem;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    h2 {
+        color: var(--primary-color);
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        text-align: center;
+        border-bottom: 2px solid var(--bg-light);
+        padding-bottom: 1rem;
+    }
+
+    /* Style the Django Form Labels and Inputs */
+    form p {
+        margin-bottom: 1.2rem;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #555;
+        font-size: 0.9rem;
+    }
+
+    input[type="text"], 
+    input[type="url"], 
+    input[type="date"], 
+    textarea, 
+    select {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: border-color 0.3s, box-shadow 0.3s;
+        box-sizing: border-box; /* Crucial for padding */
+    }
+
+    input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+
+    .btn-save {
+        width: 100%;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 0.8rem;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s;
+        margin-top: 1rem;
+    }
+
+    .btn-save:hover {
+        background-color: #1a252f;
+    }
+
+    .back-link {
+        display: block;
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #7f8c8d;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .back-link:hover {
+        color: var(--accent-color);
+        text-decoration: underline;
+    }
+
+    /* Help text and errors */
+    .helptext { color: #888; font-size: 0.8rem; display: block; margin-top: 0.3rem; }
+    .errorlist { color: #e74c3c; list-style: none; padding: 0; font-size: 0.85rem; margin-bottom: 1rem; }
+</style>
+
+<div class="form-container">
+    <h2>Add New Postdoc Position</h2>
+    
+    <form method="post" novalidate>
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            <div class="errorlist">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <small class="helptext">{{ field.help_text }}</small>
+                {% endif %}
+                {% if field.errors %}
+                    <div class="errorlist">{{ field.errors }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="btn-save">Save Position</button>
+    </form>
+
+    <a href="{% url 'jobs:position_list' %}" class="back-link">← Back to Dashboard</a>
+</div>

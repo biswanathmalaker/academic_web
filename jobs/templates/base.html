@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Postdoc Tracker{% endblock %}</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        nav a { margin-right: 15px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { padding: 8px; border-bottom: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="{% url 'postdocs:dashboard' %}">Dashboard</a>
+    <a href="{% url 'postdocs:application_list' %}">Applications</a>
+    <a href="{% url 'postdocs:application_add' %}">Add Application</a>
+</nav>
+
+<hr>
+
+{% block content %}{% endblock %}
+
+</body>
+</html>

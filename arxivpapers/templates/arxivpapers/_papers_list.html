@@ -1,0 +1,103 @@
+
+{% load static %}
+
+<div class="row justify-content-center papers-section">
+    <div class="col-lg-10 col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h3 mb-0 text-light">
+                Solar & Stellar Astrophysics
+                <small class="text-muted fs-6">(Last 7 Days)</small>
+            </h2>
+            <span class="badge bg-primary">
+                Papers found: {{ papers|length }}
+            </span>
+        </div>
+
+        {% for paper in papers %}
+        <div class="card mb-4 shadow-lg">
+            <div class="card-body p-4">
+
+                <!-- Date and Title -->
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title text-info fw-bold mb-0" style="line-height: 1.4;">
+                        {{ paper.title }}
+                    </h5>
+                    <span class="badge bg-secondary ms-3">
+                        {{ paper.published_date|date:"d M Y" }}
+                    </span>
+                </div>
+
+                <!-- Authors -->
+                <p class="text-muted small mb-3">
+                    <i class="bi bi-people-fill me-1"></i>
+                    {{ paper.authors }}
+                </p>
+
+                <!-- Optional Metadata -->
+                {% if paper.journal_ref %}
+                <div class="mb-3 small text-success">
+                    <i class="bi bi-journal-bookmark"></i>
+                    {{ paper.journal_ref }}
+                </div>
+                {% endif %}
+
+                <!-- Abstract Accordion -->
+                <div class="accordion accordion-flush rounded border border-secondary"
+                     id="accordion-{{ paper.id }}">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed py-2 px-3 small fw-semibold"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapse-{{ paper.id }}">
+                                Abstract & LaTeX Details
+                            </button>
+                        </h2>
+                        <div id="collapse-{{ paper.id }}"
+                            class="accordion-collapse collapse"
+                            data-bs-parent="#accordion-{{ paper.id }}">
+                            <div class="accordion-body small paper-summary">
+                                {{ paper.summary }}
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-3 pt-3 border-top border-secondary d-flex align-items-center">
+                    <a href="{{ paper.pdf_url }}"
+                       class="btn btn-sm btn-outline-danger me-2"
+                       target="_blank">
+                        <i class="bi bi-file-earmark-pdf"></i> PDF
+                    </a>
+
+                    {% with arxiv_id_only=paper.arxiv_id|cut:"http://arxiv.org" %}
+                    <a href="https://arxiv.org{{ arxiv_id_only }}"
+                       class="btn btn-sm btn-outline-success me-2"
+                       target="_blank">
+                        <i class="bi bi-filetype-html"></i> HTML
+                    </a>
+                    {% endwith %}
+
+                    <a href="{{ paper.arxiv_id }}"
+                       class="btn btn-sm btn-outline-primary me-2"
+                       target="_blank">
+                        <i class="bi bi-link-45deg"></i> arXiv
+                    </a>
+
+                    <code class="ms-auto text-muted small">
+                        {{ paper.arxiv_id|cut:"http://arxiv.org" }}
+                    </code>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="alert alert-dark border-secondary text-center py-5">
+            <h4 class="text-info">No Papers Loaded</h4>
+            <p>It's currently the weekend or the database needs a refresh.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>

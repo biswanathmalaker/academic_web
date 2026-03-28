@@ -1,0 +1,8 @@
+.paper-summary {
+    background-color: #0a0b0e;   /* very dark */
+    color: #ffffff;              /* white text */
+    line-height: 1.6;
+    text-align: justify;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid #1c1d22;
+}
