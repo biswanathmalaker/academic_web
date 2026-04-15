@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Portal | Papers</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --accent-primary: #38bdf8;
+            --accent-secondary: #818cf8;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: #f1f5f9;
+            font-family: 'Inter', -apple-system, sans-serif;
+            letter-spacing: -0.01em;
+        }
+
+        /* Glassmorphism Header */
+        .sticky-filter-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .paper-card:hover {
+            border-color: var(--accent-secondary);
+        }
+
+        .card-header {
+            background-color: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-pills .nav-link {
+            color: var(--text-muted);
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .nav-pills .nav-link:hover {
+            color: var(--accent-primary);
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        .btn-outline-light {
+            border-color: var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .btn-outline-light:hover {
+            background-color: var(--accent-primary);
+            color: #000;
+            border-color: var(--accent-primary);
+        }
+
+        .badge-category {
+            background: rgba(129, 140, 248, 0.15);
+            color: var(--accent-secondary);
+            border: 1px solid rgba(129, 140, 248, 0.3);
+        }
+
+        .bibtex-pre {
+            background: #000 !important;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #a5d6ff;
+        }
+
+        .filter-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+        }
+
+        .form-select, .form-control {
+            background-color: #0f172a;
+            border-color: var(--border-color);
+            color: white;
+        }
+
+        .form-select:focus, .form-control:focus {
+            background-color: #0f172a;
+            color: white;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.25);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sticky-filter-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <h3 class="mb-0 fw-bold"><i class="bi bi-journal-text me-2"></i>Papers</h3>
+                <nav>
+                    <ul class="nav nav-pills">
+                        <li class="nav-item"><a class="nav-link" href="/admin">Admin</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'literature:index' %}">Literature</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'papers:all_papers_detail' %}">Details</a></li>
+                        <li class="nav-item"><button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#addPaperModal">➕ Add Paper</button></li>
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="row mt-4 g-3">
+                <div class="col-md-4">
+                    <form method="GET" id="filterForm">
+                        <input type="hidden" name="form_name" value="type_filter">
+                        <select name="filter" class="form-select" onchange="this.form.submit()">
+                            <option value="all_papers" {% if filter_option == 'all_papers' %}selected{% endif %}>All Documents</option>
+                            <option value="only_pdf_available" {% if filter_option == 'only_pdf_available' %}selected{% endif %}>PDF Available</option>
+                            <option value="only_non_pdf" {% if filter_option == 'only_non_pdf' %}selected{% endif %}>Missing PDF</option>
+                        </select>
+                    </form>
+                </div>
+                <div class="col-md-8">
+                    <form method="GET" id="categoryFilterForm" class="d-flex gap-2">
+                        <input type="hidden" name="form_name" value="category_filter">
+                        <div class="filter-box px-3 py-1 flex-grow-1 overflow-auto" style="white-space: nowrap;">
+                            {% for cat in categories %}
+                            <div class="form-check form-check-inline mt-1">
+                                <input class="form-check-input" type="checkbox" name="category" value="{{ cat.id }}" id="top_cat{{ cat.id }}" {% if cat.id|stringformat:"s" in category_filter %}checked{% endif %}>
+                                <label class="form-check-label small" for="top_cat{{ cat.id }}">{{ cat.name }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        {% for paper in papers %}
+            <div class="card paper-card mb-4 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="btn-group">
+                        {% if paper.adsurl %}<a class="btn btn-sm btn-outline-light" href="{{ paper.adsurl }}">ADS</a>{% endif %}
+                        {% if paper.doi %}<a class="btn btn-sm btn-outline-light" href="https://doi.org/{{ paper.doi }}">DOI</a>{% endif %}
+                        {% if paper.arxiv %}<a class="btn btn-sm btn-outline-light" href="{{ paper.arxiv }}">arXiv</a>{% endif %}
+                        <button class="btn btn-sm btn-outline-light" onclick="copyBibtex('{{ paper.key }}', `{{ paper.bibtex|escapejs }}`)"><i class="bi bi-clipboard"></i> BibTeX</button>
+                    </div>
+                    <div>
+                        <a href="{% url 'papers:manage_notes' paper.id %}" class="btn btn-sm btn-link text-decoration-none text-muted"><i class="bi bi-pencil-square"></i> Notes</a>
+                        <span class="badge bg-secondary ms-2">{{ paper.year }}</span>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-9">
+                            <h5 class="card-title fw-bold mb-3">
+                                <span class="text-muted me-2">{{forloop.counter}}.</span>{{ paper.title }}
+                            </h5>
+                            <div class="mb-3">
+                                <span class="badge bg-dark border border-secondary text-info me-2">{{ paper.key }}</span>
+                                {% for cat in paper.categories.all %}
+                                <span class="badge badge-category me-1">{{ cat.name }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="d-flex gap-2 mb-3 flex-wrap">
+                                <a class="btn btn-sm btn-success px-3" href="/papers/pdf/{{ paper.key }}.pdf" target="_blank">
+                                    <i class="bi bi-file-earmark-pdf"></i> View PDF
+                                </a>
+                                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ paper.id }}">
+                                    Abstract
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#bibtex{{ paper.id }}">
+                                    Source
+                                </button>
+                            </div>
+
+                            <div class="collapse" id="collapse{{ paper.id }}">
+                                <div class="p-3 mb-3 bg-dark rounded small text-light border-start border-primary border-4">
+                                    {{ paper.abstract|default:"No abstract available." }}
+                                </div>
+                            </div>
+
+                            <div class="collapse" id="bibtex{{ paper.id }}">
+                                <pre class="bibtex-pre">{{ paper.bibtex }}</pre>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 border-start border-color d-none d-lg-block">
+                            <form method="post" action="{% url 'papers:update_categories' paper.id %}">
+                                {% csrf_token %}
+                                <p class="small fw-bold text-muted text-uppercase mb-2">Categories</p>
+                                <div class="overflow-auto" style="max-height: 150px;">
+                                    {% for cat in categories %}
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="categories" value="{{ cat.id }}" id="p{{ paper.id }}c{{ cat.id }}" {% if cat in paper.categories.all %}checked{% endif %}>
+                                        <label class="form-check-label small" for="p{{ paper.id }}c{{ cat.id }}">{{ cat.name }}</label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <button type="submit" class="btn btn-sm btn-warning w-100 mt-2">Update</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="modal fade" id="addPaperModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title">Add Paper (BibTeX)</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addPaperForm" method="post" action="{% url 'papers:add_paper' %}">
+                        {% csrf_token %}
+                        <textarea name="bibtex" rows="12" class="form-control bg-black text-info font-monospace" placeholder="@article{...}"></textarea>
+                        <div class="mt-3 text-end">
+                            <button type="button" class="btn btn-outline-light me-2" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary px-4">Save Entry</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+    function copyBibtex(paperKey, rawBibtex) {
+        if (!rawBibtex) {
+            showToast("No BibTeX available", "danger");
+            return;
+        }
+        const modified = rawBibtex.replace(/@(\w+)\s*\{[^,]*,/, (_, type) => `@${type}{${paperKey},`);
+        navigator.clipboard.writeText(modified).then(() => showToast(`Copied BibTeX: ${paperKey}`));
+    }
+
+    function showToast(message, variant="success") {
+        const toast = document.createElement("div");
+        toast.innerText = message;
+        Object.assign(toast.style, {
+            position: "fixed", bottom: "30px", right: "30px",
+            background: variant === "success" ? "#10b981" : "#ef4444",
+            color: "white", padding: "12px 24px", borderRadius: "8px",
+            zIndex: 9999, fontWeight: "500", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.5)"
+        });
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = "0"; toast.style.transition = "0.5s"; }, 2000);
+        setTimeout(() => toast.remove(), 2600);
+    }
+    </script>
+</body>
+</html>
