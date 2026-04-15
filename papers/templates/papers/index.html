@@ -8,20 +8,21 @@
         body {
             background-color: #121212; /* Dark background */
             color: #e0e0e0; /* Light text */
-            background-image: url('https://www.transparenttextures.com/patterns/stardust.png'); /* Optional subtle bg image */
-            background-size: cover;
+            min-height: 100vh;
         }
         .card {
             border: none;
-            border-radius: 12px;
+            border-radius: 15px;
             overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background-color: #1e1e1e;
         }
         .card-header {
-            background-color: #2c2c2c; /* darker gray */
+            background-color: #2c2c2c;
             color: #fff;
         }
         .card-body {
-            background-color: #3a3a3a; /* lighter gray */
+            background-color: #2c2c2c;
             color: #f1f1f1;
         }
         .btn-outline-primary {
@@ -49,47 +50,59 @@
 <body>
 
     <div class="container py-4">
-
-
-
         <div class="card text-center mb-4 shadow-lg">
-            <div class="card-header">
-                <ul class="nav nav-pills card-header-pills justify-content-center">
-
-
+            <div class="card-header bg-dark text-white">
+                <h2 class="mb-0">Academic Papers Management</h2>
+                <ul class="nav nav-pills card-header-pills justify-content-center mt-3">
                     <li class="nav-item">
-                        <a class="nav-link active" href="/admin">Admin</a>
+                        <a class="nav-link" href="/admin">Admin</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href={% url "literature:index" %}>Literature</a>
-                    </li>
-                    <br>
-                    <li class="nav-item">
-                        <a class="nav-link active" href={% url "papers:all_papers_detail" %}>all papers detail</a>
+                        <a class="nav-link" href="{% url 'literature:index' %}">Literature</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href={% url "papers:statement_list" %}>all Statements</a>
+                        <a class="nav-link" href="{% url 'papers:all_papers_detail' %}">All Papers Detail</a>
                     </li>
-                    <li class="'nav-item">
-
-                        <form method="GET" id="filterForm" class="mb-3">
-                            <label class="form-label fw-bold">Filter Papers:</label>
-                            <select name="filter" class="form-select w-auto d-inline" onchange="document.getElementById('filterForm').submit();">
-                                <option value="all_papers" {% if filter_option == 'all_papers' %}selected{% endif %}>All Papers</option>
-                                <option value="only_pdf_available" {% if filter_option == 'only_pdf_available' %}selected{% endif %}>Only PDF Available</option>
-                                <option value="only_non_pdf" {% if filter_option == 'only_non_pdf' %}selected{% endif %}>Only Non-PDF</option>
-                                <option value="papers_cited_by_statements" {% if filter_option == 'papers_cited_by_statements' %}selected{% endif %}>papers cited by statements</option>
-
-                                
-                            </select>
-                        </form>
-
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'papers:statement_list' %}">All Statements</a>
                     </li>
                 </ul>
             </div>
             <div class="card-body">
-                <h1 class="card-title">Papers</h1>
-                <p class="card-text">List of all the papers with details.</p>
+                <h5 class="card-title">Papers List</h5>
+                <p class="card-text">Manage and filter your academic papers.</p>
+
+                <!-- Filters Section -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <form method="GET" id="filterForm">
+                            <label class="form-label fw-bold">Paper Type Filter:</label>
+                            <select name="filter" class="form-select" onchange="document.getElementById('filterForm').submit();">
+                                <option value="all_papers" {% if filter_option == 'all_papers' %}selected{% endif %}>All Papers</option>
+                                <option value="only_pdf_available" {% if filter_option == 'only_pdf_available' %}selected{% endif %}>Only PDF Available</option>
+                                <option value="only_non_pdf" {% if filter_option == 'only_non_pdf' %}selected{% endif %}>Only Non-PDF</option>
+                                <option value="papers_cited_by_statements" {% if filter_option == 'papers_cited_by_statements' %}selected{% endif %}>Papers Cited by Statements</option>
+                            </select>
+                        </form>
+                    </div>
+                    <div class="col-md-6">
+                        <form method="GET" id="categoryFilterForm">
+                            <label class="form-label fw-bold">Category Filter:</label>
+                            <div class="border rounded p-3" style="background-color: #3a3a3a; border-color: #555;">
+                                <p class="text-light fw-bold mb-2">Select categories to filter papers (leave empty to show all):</p>
+                                {% for cat in categories %}
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input category-checkbox" type="checkbox" name="category" value="{{ cat.id }}" id="cat{{ cat.id }}" {% if cat.id|stringformat:"s" in category_filter %}checked{% endif %}>
+                                    <label class="form-check-label text-light" for="cat{{ cat.id }}">
+                                        {{ cat.name }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-2">Apply Category Filter</button>
+                        </form>
+                    </div>
+                </div>
 
                 <!-- Add Paper button -->
                 <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addPaperModal">
@@ -122,36 +135,49 @@
 
         {% for paper in papers %}
             <div class="card mb-3 shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center">
-
-                    <div class="btn-group">
-                    {% if paper.adsurl %}<a class="btn btn-sm btn-outline-primary" href="{{ paper.adsurl }}">ADS</a>{% endif %}
-                    {% if paper.doi %}<a class="btn btn-sm btn-outline-primary" href="https://doi.org/{{ paper.doi }}">DOI</a>{% endif %}
-                    {% if paper.arxiv %}<a class="btn btn-sm btn-outline-primary" href="{{ paper.arxiv }}">arXiv</a>{% endif %}
-
-                    <!-- Copy BibTeX (replaces entry key with paper.key before copying) -->
-                    <button class="btn btn-sm btn-outline-primary"
-                            onclick="copyBibtex('{{ paper.key }}', `{{ paper.bibtex|escapejs }}`)">
-                        📋 Copy BibTeX
-                    </button>
-
-                    <a class="btn btn-sm btn-outline-primary" href="{% url 'papers:manage_notes' paper.id %}" class="btn btn-sm btn-outline-success">Manage Notes</a>
-
-                    <a class="btn btn-sm btn-outline-primary" href="{% url 'papers:read_notes' paper.id %}" class="btn btn-sm btn-outline-success">Read Notes</a>
-
-                    </div>
-                <span class="badge bg-secondary">{{ paper.year }}</span>
+            <div class="card-header d-flex justify-content-between align-items-center bg-secondary text-white">
+                <div class="btn-group flex-wrap">
+                    {% if paper.adsurl %}<a class="btn btn-sm btn-outline-light" href="{{ paper.adsurl }}">ADS</a>{% endif %}
+                    {% if paper.doi %}<a class="btn btn-sm btn-outline-light" href="https://doi.org/{{ paper.doi }}">DOI</a>{% endif %}
+                    {% if paper.arxiv %}<a class="btn btn-sm btn-outline-light" href="{{ paper.arxiv }}">arXiv</a>{% endif %}
+                    <button class="btn btn-sm btn-outline-light" onclick="copyBibtex('{{ paper.key }}', `{{ paper.bibtex|escapejs }}`)">📋 BibTeX</button>
+                    <a class="btn btn-sm btn-outline-light" href="{% url 'papers:manage_notes' paper.id %}">Manage Notes</a>
+                    <a class="btn btn-sm btn-outline-light" href="{% url 'papers:read_notes' paper.id %}">Read Notes</a>
                 </div>
+                <span class="badge bg-primary fs-6">{{ paper.year }}</span>
+            </div>
                 
                 <div class="card-body text-start">
                     <h5 class="card-title">{{forloop.counter}}. {{ paper.title }}</h5>
-                    <p class="card-text"><span class="badge bg-dark">{{ paper.key }}</span></p>
+                    <p class="card-text">
+                        <span class="badge bg-dark me-2">{{ paper.key }}</span>
+                        {% for cat in paper.categories.all %}
+                        <span class="badge bg-info me-1">{{ cat.name }}</span>
+                        {% endfor %}
+                    </p>
 
                     <a class="btn btn-sm btn-outline-success"
                     href="/papers/pdf/{{ paper.key }}.pdf"
                     target="_blank">
                     📄 PDF
                     </a>
+
+                    <!-- Category Assignment -->
+                    <div class="mt-2">
+                        <form method="post" action="{% url 'papers:update_categories' paper.id %}" class="d-inline-block">
+                            {% csrf_token %}
+                            <label class="form-label small fw-bold me-2 text-light">Assign Categories:</label>
+                            {% for cat in categories %}
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" name="categories" value="{{ cat.id }}" id="paper_cat_{{ paper.id }}_{{ cat.id }}" {% if cat in paper.categories.all %}checked{% endif %}>
+                                <label class="form-check-label small text-light" for="paper_cat_{{ paper.id }}_{{ cat.id }}">
+                                    {{ cat.name }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                            <button type="submit" class="btn btn-sm btn-warning ms-2">Update</button>
+                        </form>
+                    </div>
 
                     {% if paper.abstract %}
                         <button class="btn btn-sm btn-primary" type="button" 

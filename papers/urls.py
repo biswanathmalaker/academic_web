@@ -29,4 +29,5 @@ urlpatterns = [
         views.statements_by_topic,
         name="statements_by_topic_print"
     ),
+    path('papers/<int:paper_id>/update_categories/', views.update_categories, name='update_categories'),
 ]

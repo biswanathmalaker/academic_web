@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import Paper
+from .models import Paper, Category
 from .utils import save_bibtex
 # views.py
 import requests
@@ -48,6 +48,10 @@ def index(request):
     else:
         filter_option = request.session.get("papers_filter", "all_papers")
 
+    # Category filter
+    category_filter = request.GET.get("category", "")
+    request.session["category_filter"] = category_filter
+
     papers = Paper.objects.all().order_by("-year")
 
     pdf_dir = os.path.join(settings.BASE_DIR, "papers", "pdf")
@@ -81,16 +85,30 @@ def index(request):
     else:
         filtered_papers = papers
 
+    # Apply category filter if selected
+    if category_filter:
+        category_ids = category_filter.split(',')
+        filtered_papers = [p for p in filtered_papers if p.categories.filter(id__in=category_ids).exists()]
+
+    categories = Category.objects.all()
+
     return render(
         request,
         "papers/index.html",
         {
             "papers": filtered_papers,
             "filter_option": filter_option,
+            "categories": categories,
+            "category_filter": category_filter,
         }
     )
 
-
+@require_POST
+def update_categories(request, paper_id):
+    paper = get_object_or_404(Paper, id=paper_id)
+    category_ids = request.POST.getlist('categories')
+    paper.categories.set(category_ids)
+    return redirect('papers:index')
 
 def add_paper(request):
     if request.method == "POST":

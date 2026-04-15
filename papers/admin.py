@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Paper , Statement , Topic
+from .models import Paper , Statement , Topic, Category
 
 @admin.register(Paper)
 
@@ -20,6 +20,11 @@ class StatementAdmin(admin.ModelAdmin):
 
 
 @admin.register(Topic)
-class StatementAdmin(admin.ModelAdmin):
+class TopicAdmin(admin.ModelAdmin):
 #     # search_fields = ('paper','section')
     list_display = ('name','description')
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug')
+    prepopulated_fields = {'slug': ('name',)}
