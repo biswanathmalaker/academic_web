@@ -76,6 +76,7 @@
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
                         <form method="GET" id="filterForm">
+                            <input type="hidden" name="form_name" value="type_filter">
                             <label class="form-label fw-bold">Paper Type Filter:</label>
                             <select name="filter" class="form-select" onchange="document.getElementById('filterForm').submit();">
                                 <option value="all_papers" {% if filter_option == 'all_papers' %}selected{% endif %}>All Papers</option>
@@ -87,6 +88,7 @@
                     </div>
                     <div class="col-md-6">
                         <form method="GET" id="categoryFilterForm">
+                            <input type="hidden" name="form_name" value="category_filter">
                             <label class="form-label fw-bold">Category Filter:</label>
                             <div class="border rounded p-3" style="background-color: #3a3a3a; border-color: #555;">
                                 <p class="text-light fw-bold mb-2">Select categories to filter papers (leave empty to show all):</p>

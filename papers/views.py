@@ -40,63 +40,49 @@ from django.conf import settings
 from django.shortcuts import render
 from .models import Paper
 
-def index(request):
-    # 1. Determine current filter (GET > session > default)
+def get_filtered_papers(request):
     filter_option = request.GET.get("filter")
     if filter_option:
         request.session["papers_filter"] = filter_option
     else:
         filter_option = request.session.get("papers_filter", "all_papers")
 
-    # Category filter
-    category_filter = request.GET.get("category", "")
-    request.session["category_filter"] = category_filter
+    form_name = request.GET.get("form_name")
+    if form_name == "category_filter":
+        category_filter = request.GET.getlist("category")
+        request.session["category_filter"] = category_filter
+    else:
+        category_filter = request.session.get("category_filter", [])
 
     papers = Paper.objects.all().order_by("-year")
-
     pdf_dir = os.path.join(settings.BASE_DIR, "papers", "pdf")
-    filtered_papers = []
 
-    # 2. Filtering logic
     if filter_option == "only_pdf_available":
-        for p in papers:
-            pdf_path = os.path.join(pdf_dir, f"{p.key}.pdf")
-            if os.path.exists(pdf_path):
-                filtered_papers.append(p)
-
+        papers = [p for p in papers if os.path.exists(os.path.join(pdf_dir, f"{p.key}.pdf"))]
     elif filter_option == "only_non_pdf":
-        for p in papers:
-            pdf_path = os.path.join(pdf_dir, f"{p.key}.pdf")
-            if not os.path.exists(pdf_path):
-                filtered_papers.append(p)
-    
+        papers = [p for p in papers if not os.path.exists(os.path.join(pdf_dir, f"{p.key}.pdf"))]
     elif filter_option == "papers_cited_by_statements":
-
-        # from papers.models import Paper
-
-        filtered_papers = (
+        papers = (
             Paper.objects
             .filter(cited_by__isnull=False)
             .distinct()
             .order_by("-year")
         )
 
-
-    else:
-        filtered_papers = papers
-
-    # Apply category filter if selected
     if category_filter:
-        category_ids = category_filter.split(',')
-        filtered_papers = [p for p in filtered_papers if p.categories.filter(id__in=category_ids).exists()]
+        papers = [p for p in papers if p.categories.filter(id__in=category_filter).exists()]
 
+    return papers, filter_option, category_filter
+
+
+def index(request):
+    papers, filter_option, category_filter = get_filtered_papers(request)
     categories = Category.objects.all()
-
     return render(
         request,
         "papers/index.html",
         {
-            "papers": filtered_papers,
+            "papers": papers,
             "filter_option": filter_option,
             "categories": categories,
             "category_filter": category_filter,
@@ -342,12 +328,12 @@ def add_abstract(request, paper_id):
 
 
 def all_papers_detail(request):
-    papers = Paper.objects.all().order_by('-year')
+    papers, _, _ = get_filtered_papers(request)
     return render(request, "papers/all_papers_detail.html", {"papers": papers})
 
 
 def all_papers_pdf(request):
-    papers = Paper.objects.all().order_by('-year')
+    papers, _, _ = get_filtered_papers(request)
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
     styles = getSampleStyleSheet()
