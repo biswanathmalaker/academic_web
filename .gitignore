@@ -4,15 +4,14 @@ __pycache__/
 migrations/
 __init__.py
 *.json
-intallation_process.txt
+
 
 academic_web/
 test_file.py
 papers/pdf/
 
 db.sqlite3
-manage.py
-manage1.py
+
 
 papers1/
 literature1/
