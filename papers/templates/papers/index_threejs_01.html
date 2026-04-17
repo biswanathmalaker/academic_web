@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papers Management - Astrophysical Vista</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            /* Deep space palette - slightly darker main bg for space contrast */
+            --bg-main: #010409;
+            /* Cards need higher opacity to remain readable against complex backgrounds */
+            --bg-card: rgba(15, 23, 42, 0.85); 
+            --accent-primary: #7dd3fc; /* Stellar Blue */
+            --accent-secondary: #c084fc; /* Nebular Purple */
+            --text-high: #ffffff;
+            --text-medium: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border-color: rgba(94, 234, 212, 0.2); /* Very subtle teal border */
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-medium);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden; /* Prevent scrollbars from canvas slightly overlapping */
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* --- Layout Components --- */
+        .sticky-filter-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            /* Stronger blur and opacity for header readability */
+            background: rgba(1, 4, 9, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            margin-bottom: 3rem;
+        }
+
+        /* --- Text & Contrast --- */
+        .card-title { color: var(--text-high); }
+        .nav-link { color: var(--text-muted); font-weight: 500; transition: color 0.2s; }
+        .nav-link:hover { color: var(--accent-primary); }
+        
+        /* Papers Cards - "Floating Panels" */
+        .paper-card {
+            background-color: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            margin-bottom: 2.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInReveal 0.6s ease forwards;
+        }
+
+        .paper-card:hover {
+            border-color: rgba(125, 211, 252, 0.5);
+            transform: translateY(-5px) scale(1.01);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-header {
+            background-color: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.25rem;
+            border-top-left-radius: 12px !important;
+            border-top-right-radius: 12px !important;
+        }
+
+        /* --- Sidebar & Forms --- */
+        .category-sidebar-list {
+            max-height: 150px; 
+            overflow-y: auto;
+            background: rgba(1, 4, 9, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        /* Custom Scrollbar */
+        .category-sidebar-list::-webkit-scrollbar { width: 4px; }
+        .category-sidebar-list::-webkit-scrollbar-thumb {
+            background: rgba(192, 132, 252, 0.5);
+            border-radius: 10px;
+        }
+
+        .form-check-label { color: var(--text-muted) !important; font-size: 0.85rem; }
+        .form-check-input:checked + .form-check-label { color: var(--text-high) !important; }
+
+        .form-select, .form-control {
+            background-color: rgba(1, 4, 9, 0.7) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text-high) !important;
+        }
+        .form-select:focus, .form-control:focus {
+            border-color: var(--accent-primary) !important;
+            box-shadow: 0 0 0 0.25rem rgba(125, 211, 252, 0.15);
+        }
+
+        /* --- Utilities --- */
+        .bibtex-pre {
+            background: #000 !important;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #a5d6ff;
+            max-height: 300px;
+            overflow: auto;
+            border: 1px solid #222;
+        }
+
+        .badge-category {
+            background: rgba(192, 132, 252, 0.1);
+            color: var(--accent-secondary);
+            border: 1px solid rgba(192, 132, 252, 0.2);
+        }
+
+        @keyframes fadeInReveal {
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <header class="sticky-filter-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <h3 class="mb-0 fw-bold text-white"><i class="bi bi-star-fill me-2 text-warning"></i>Papers</h3>
+                <ul class="nav nav-pills gap-2">
+                    <li class="nav-item"><a class="nav-link" href="/admin">Admin</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'literature:index' %}">Literature</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'papers:all_papers_detail' %}">Detail View</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'papers:statement_list' %}">all Statements</a></li>
+                    <li class="nav-item"><button class="btn btn-primary btn-sm px-3 round-pill" data-bs-toggle="modal" data-bs-target="#addPaperModal">➕ Add Paper</button></li>
+                </ul>
+            </div>
+
+            <div class="row mt-3 g-3">
+                <div class="col-md-4">
+                    <form method="GET" id="filterForm">
+                        <input type="hidden" name="form_name" value="type_filter">
+                        <select name="filter" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="all_papers" {% if filter_option == 'all_papers' %}selected{% endif %}>All Papers</option>
+                            <option value="only_pdf_available" {% if filter_option == 'only_pdf_available' %}selected{% endif %}>PDF Available</option>
+                            <option value="only_non_pdf" {% if filter_option == 'only_non_pdf' %}selected{% endif %}>Missing PDF</option>
+                            <option value="papers_cited_by_statements" {% if filter_option == 'papers_cited_by_statements' %}selected{% endif %}>Cited by Statements</option>
+                        </select>
+                    </form>
+                </div>
+                <div class="col-md-8">
+                    <form method="GET" id="categoryFilterForm">
+                        <input type="hidden" name="form_name" value="category_filter">
+                        <div class="d-flex gap-2">
+                            <div class="category-sidebar-list flex-grow-1" style="max-height: 38px; display: flex; align-items: center; white-space: nowrap; overflow-x: auto; overflow-y: hidden; padding: 0 10px;">
+                                {% for cat in categories %}
+                                <div class="form-check form-check-inline m-0 me-3">
+                                    <input class="form-check-input" type="checkbox" name="category" value="{{ cat.id }}" id="top_cat{{ cat.id }}" {% if cat.id|stringformat:"s" in category_filter %}checked{% endif %}>
+                                    <label class="form-check-label text-white" for="top_cat{{ cat.id }}">{{ cat.name }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <button type="submit" class="btn btn-secondary btn-sm px-3">Apply</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container pb-5">
+        {% for paper in papers %}
+            <div class="card paper-card shadow" style="animation-delay: 0.{{ forloop.counter }}s">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="btn-group">
+                        {% if paper.adsurl %}<a class="btn btn-sm btn-outline-light" href="{{ paper.adsurl }}" target="_blank">ADS</a>{% endif %}
+                        {% if paper.doi %}<a class="btn btn-sm btn-outline-light" href="https://doi.org/{{ paper.doi }}" target="_blank">DOI</a>{% endif %}
+                        {% if paper.arxiv %}<a class="btn btn-sm btn-outline-light" href="{{ paper.arxiv }}" target="_blank">arXiv</a>{% endif %}
+                        <button class="btn btn-sm btn-outline-light" onclick="copyBibtex('{{ paper.key }}', `{{ paper.bibtex|escapejs }}`)"><i class="bi bi-clipboard"></i> BibTeX</button>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="{% url 'papers:manage_notes' paper.id %}" class="btn btn-sm btn-link text-info text-decoration-none small p-0"><i class="bi bi-pencil-square"></i> Notes</a>
+                        <span class="text-muted">|</span>
+                        <a href="{% url 'papers:read_notes' paper.id %}" class="btn btn-sm btn-link text-info text-decoration-none small p-0"><i class="bi bi-eye"></i> Read</a>
+                        <span class="badge bg-primary ms-2 px-3 py-2 rounded-pill">{{ paper.year }}</span>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-lg-9">
+                            <h5 class="card-title fw-bold mb-3">
+                                <span class="text-accent-primary me-2">{{forloop.counter}}.</span>{{ paper.title }}
+                            </h5>
+                            
+                            <div class="mb-3 d-flex flex-wrap gap-2">
+                                <span class="badge bg-dark border border-secondary text-info fw-normal">{{ paper.key }}</span>
+                                {% for cat in paper.categories.all %}
+                                <span class="badge badge-category rounded-pill">{{ cat.name }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a class="btn btn-sm btn-success px-4 rounded-pill" href="/papers/pdf/{{ paper.key }}.pdf" target="_blank">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> PDF
+                                </a>
+                                <button class="btn btn-sm btn-outline-primary rounded-pill" type="button" data-bs-toggle="collapse" data-bs-target="#abs{{ paper.id }}">Abstract</button>
+                                <button class="btn btn-sm btn-outline-secondary rounded-pill" type="button" data-bs-toggle="collapse" data-bs-target="#bib{{ paper.id }}">Source</button>
+                            </div>
+
+                            <div class="collapse mt-3" id="abs{{ paper.id }}">
+                                <div class="p-3 bg-dark rounded small text-light border-start border-info border-4">
+                                    {{ paper.abstract|default:"No abstract available for this entry." }}
+                                </div>
+                            </div>
+                            <div class="collapse mt-3" id="bib{{ paper.id }}">
+                                <pre class="bibtex-pre">{{ paper.bibtex }}</pre>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 border-start border-color">
+                            <form method="post" action="{% url 'papers:update_categories' paper.id %}">
+                                {% csrf_token %}
+                                <p class="small text-muted text-uppercase fw-bold mb-2" style="font-size: 0.75rem; letter-spacing: 0.05em;">Update Categories</p>
+                                
+                                <div class="category-sidebar-list mb-3">
+                                    {% for cat in categories %}
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="categories" value="{{ cat.id }}" id="p{{ paper.id }}c{{ cat.id }}" {% if cat in paper.categories.all %}checked{% endif %}>
+                                        <label class="form-check-label" for="p{{ paper.id }}c{{ cat.id }}">
+                                            {{ cat.name }}
+                                        </label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+
+                                <button type="submit" class="btn btn-sm btn-warning w-100 fw-bold py-2 rounded-pill">Update Entry</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </main>
+
+    <div class="modal fade" id="addPaperModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-white">Add BibTeX Entry</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{% url 'papers:add_paper' %}">
+                        {% csrf_token %}
+                        <textarea name="bibtex" rows="12" class="form-control font-monospace mb-3" placeholder="@article{key, ...}"></textarea>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary px-4">Save Paper</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+
+    <script>
+    /** ASTROPHYSICAL BACKGROUND **/
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+
+    // Global Group for subtle rotation
+    const astroGroup = new THREE.Group();
+    scene.add(astroGroup);
+
+    const textureLoader = new THREE.TextureLoader();
+
+    // 1. STARFIELD (Thousands of distinct stars)
+    const starsGeometry = new THREE.BufferGeometry();
+    const starsCount = 8000;
+    const starPositions = new Float32Array(starsCount * 3);
+    const starColors = new Float32Array(starsCount * 3);
+
+    for (let i = 0; i < starsCount * 3; i += 3) {
+        // Distribute stars in a huge sphere
+        const r = 900;
+        const theta = THREE.MathUtils.randFloat(0, Math.PI * 2);
+        const phi = THREE.MathUtils.randFloat(0, Math.PI);
+        
+        starPositions[i] = r * Math.sin(phi) * Math.cos(theta);
+        starPositions[i + 1] = r * Math.sin(phi) * Math.sin(theta);
+        starPositions[i + 2] = r * Math.cos(phi);
+
+        // Randomize star colors (slight blue/yellow tint)
+        const tint = Math.random();
+        if (tint > 0.8) { // Bluer
+            starColors[i] = 0.8; starColors[i+1] = 0.8; starColors[i+2] = 1.0;
+        } else if (tint > 0.6) { // Yellower
+            starColors[i] = 1.0; starColors[i+1] = 1.0; starColors[i+2] = 0.8;
+        } else { // White
+            starColors[i] = 1.0; starColors[i+1] = 1.0; starColors[i+2] = 1.0;
+        }
+    }
+    starsGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+    starsGeometry.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+
+    const starsMaterial = new THREE.PointsMaterial({
+        size: 0.7,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.8,
+        sizeAttenuation: true
+    });
+    const starField = new THREE.Points(starsGeometry, starsMaterial);
+    astroGroup.add(starField);
+
+
+    // 2. DISTANT GALAXY (Using a texture sprite for realism/performance)
+    // Using a public domain placeholder URL. In production, host this image yourself.
+    const galaxyTexture = textureLoader.load('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/NGC_4414_%28reprocessed%29.jpg/1024px-NGC_4414_%28reprocessed%29.jpg');
+    const galaxyMaterial = new THREE.SpriteMaterial({ 
+        map: galaxyTexture, 
+        transparent: true, 
+        opacity: 0.3,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+    });
+    const galaxy = new THREE.Sprite(galaxyMaterial);
+    galaxy.position.set(-150, 50, -400); // Distant background
+    galaxy.scale.set(300, 200, 1);
+    astroGroup.add(galaxy);
+
+
+    // 3. GASEOUS NEBULA EFFECT (Using large, overlapping transparent planes)
+    // Using a simple cloud texture to simulate gas
+    const nebulaTexture = textureLoader.load('https://threejs.org/examples/textures/lensflare/lensflare0_alpha.png');
+    const nebulaGeometry = new THREE.PlaneGeometry(500, 500);
+    
+    // Create a few nebula clouds with different colors
+    const colors = [0x38bdf8, 0x818cf8, 0xc084fc];
+    for(let i=0; i<3; i++) {
+        const nebulaMaterial = new THREE.MeshBasicMaterial({
+            map: nebulaTexture,
+            transparent: true,
+            opacity: 0.05,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            color: colors[i],
+            side: THREE.DoubleSide
+        });
+        const nebulaPlane = new THREE.Mesh(nebulaGeometry, nebulaMaterial);
+        nebulaPlane.position.set(
+            THREE.MathUtils.randFloat(100, 300), 
+            THREE.MathUtils.randFloat(-100, 100), 
+            THREE.MathUtils.randFloat(-300, -500)
+        );
+        nebulaPlane.rotation.z = Math.random() * Math.PI;
+        astroGroup.add(nebulaPlane);
+    }
+
+
+    // 4. DISTANT SUN (Simple glowing sphere)
+    const sunGeometry = new THREE.SphereGeometry(10, 32, 32);
+    const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xfffaf0 });
+    const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+    sun.position.set(400, 200, -600);
+    astroGroup.add(sun);
+
+    const sunGlowMaterial = new THREE.SpriteMaterial({
+        map: nebulaTexture, // reuse flare texture
+        color: 0xffe0b3,
+        transparent: true,
+        opacity: 0.4,
+        blending: THREE.AdditiveBlending
+    });
+    const sunGlow = new THREE.Sprite(sunGlowMaterial);
+    sunGlow.scale.set(100, 100, 1);
+    sun.add(sunGlow); // Glow moves with the sun
+
+
+    camera.position.z = 50;
+
+
+    // Animation Variables
+    let mouseX = 0, mouseY = 0;
+    const target = new THREE.Vector2();
+    const windowHalfX = window.innerWidth / 2;
+    const windowHalfY = window.innerHeight / 2;
+
+    document.addEventListener('mousemove', (event) => {
+        mouseX = (event.clientX - windowHalfX);
+        mouseY = (event.clientY - windowHalfY);
+    });
+
+    // Main Animation Loop
+    function animate() {
+        requestAnimationFrame(animate);
+
+        // Subtle automatic rotation
+        astroGroup.rotation.y += 0.0003;
+        astroGroup.rotation.x += 0.0001;
+
+        // Reactive camera sway based on mouse
+        target.x = (mouseX) * 0.02;
+        target.y = (mouseY) * 0.01;
+
+        camera.position.x += (target.x - camera.position.x) * 0.05;
+        camera.position.y += (-target.y - camera.position.y) * 0.05;
+        camera.lookAt(scene.position);
+
+        renderer.render(scene, camera);
+    }
+
+    // Handle Resize
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    animate();
+
+    /** ORIGINAL JS FUNCTIONS **/
+    function copyBibtex(paperKey, rawBibtex) {
+        if (!rawBibtex) { alert("No BibTeX available"); return; }
+        const modified = rawBibtex.replace(/@(\w+)\s*\{[^,]*,/, (_, type) => `@${type}{${paperKey},`);
+        navigator.clipboard.writeText(modified).then(() => {
+            // Replaced custom toast with basic alert for simplicity, revert if needed
+            alert(`Copied BibTeX for ${paperKey}`);
+        });
+    }
+    </script>
+</body>
+</html>

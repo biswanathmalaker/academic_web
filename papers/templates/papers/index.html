@@ -9,14 +9,14 @@
 
     <style>
         :root {
-            --bg-main: #0f172a;           /* Deep Navy */
-            --bg-card: #1e293b;           /* Slate Blue */
-            --accent-primary: #38bdf8;    /* Sky Blue */
-            --accent-secondary: #818cf8;  /* Indigo */
-            --text-high: #ffffff;         /* Pure White */
-            --text-medium: #cbd5e1;       /* Light Slate */
-            --text-muted: #94a3b8;        /* Muted Slate */
-            --border-color: #334155;      /* Slate Border */
+            --bg-main: #020617;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --accent-primary: #38bdf8;
+            --accent-secondary: #818cf8;
+            --text-high: #ffffff;
+            --text-medium: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-color: rgba(51, 65, 85, 0.6);
         }
 
         body {
@@ -24,6 +24,17 @@
             color: var(--text-medium);
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             min-height: 100vh;
+            margin: 0;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
         }
 
         /* --- Layout Components --- */
@@ -31,66 +42,65 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border-color);
             padding: 1.5rem 0;
-            margin-bottom: 2rem;
+            margin-bottom: 3rem;
         }
 
+        /* Separated "Floating" Cards */
         .paper-card {
             background-color: var(--bg-card);
+            backdrop-filter: blur(10px);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            transition: border-color 0.2s ease;
+            border-radius: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 2.5rem; /* Increased spacing between cards */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            animation: fadeIn 0.5s ease forwards;
+            opacity: 0;
         }
 
         .paper-card:hover {
-            border-color: var(--accent-secondary);
+            border-color: var(--accent-primary);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
         }
 
         .card-header {
             background-color: rgba(255, 255, 255, 0.03);
             border-bottom: 1px solid var(--border-color);
-            padding: 1rem;
+            padding: 1.25rem;
+            border-top-left-radius: 16px !important;
+            border-top-right-radius: 16px !important;
         }
 
-        /* --- Text & Contrast --- */
-        .card-title { color: var(--text-high); }
-        .text-contrast-label { color: var(--text-medium) !important; font-weight: 600; }
-        .nav-link { color: var(--text-muted); font-weight: 500; }
-        .nav-link:hover { color: var(--accent-primary); }
-        
         /* --- Sidebar & Forms --- */
         .category-sidebar-list {
-            max-height: 140px; 
+            max-height: 150px; 
             overflow-y: auto;
-            background: rgba(15, 23, 42, 0.4);
+            background: rgba(15, 23, 42, 0.5);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 10px;
         }
 
-        /* Custom Scrollbar */
-        .category-sidebar-list::-webkit-scrollbar { width: 5px; }
-        .category-sidebar-list::-webkit-scrollbar-thumb {
-            background: var(--accent-secondary);
-            border-radius: 10px;
-        }
-
-        .form-check-label {
-            color: var(--text-medium) !important;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
+        .category-sidebar-list::-webkit-scrollbar { width: 4px; }
+        .category-sidebar-list::-webkit-scrollbar-thumb { background: var(--accent-secondary); border-radius: 10px; }
 
         .form-select, .form-control {
-            background-color: #0f172a !important;
+            background-color: rgba(15, 23, 42, 0.8) !important;
             border-color: var(--border-color) !important;
             color: var(--text-high) !important;
         }
 
-        /* --- Utilities --- */
+        .badge-category {
+            background: rgba(129, 140, 248, 0.15);
+            color: var(--accent-secondary);
+            border: 1px solid rgba(129, 140, 248, 0.3);
+        }
+
         .bibtex-pre {
             background: #000 !important;
             padding: 15px;
@@ -101,27 +111,25 @@
             overflow: auto;
         }
 
-        .badge-category {
-            background: rgba(129, 140, 248, 0.15);
-            color: var(--accent-secondary);
-            border: 1px solid rgba(129, 140, 248, 0.3);
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
+
+    <div id="canvas-container"></div>
 
     <header class="sticky-filter-header">
         <div class="container">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <h3 class="mb-0 fw-bold text-white"><i class="bi bi-journal-bookmark-fill me-2 text-info"></i>Papers</h3>
                 <ul class="nav nav-pills gap-2">
-                    <li class="nav-item"><a class="nav-link" href="/admin">Admin</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'literature:index' %}">Literature</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'papers:all_papers_detail' %}">Detail View</a></li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href={% url "papers:statement_list" %}>all Statements</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link text-light" href="/admin">Admin</a></li>
+                    <li class="nav-item"><a class="nav-link text-light" href="{% url 'literature:index' %}">Literature</a></li>
+                    <li class="nav-item"><a class="nav-link text-light" href="{% url 'papers:all_papers_detail' %}">Detail View</a></li>
+                    <li class="nav-item"><a class="nav-link text-light" href="{% url 'papers:statement_list' %}">all Statements</a></li>
                     <li class="nav-item"><button class="btn btn-primary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#addPaperModal">➕ Add Paper</button></li>
                 </ul>
             </div>
@@ -130,7 +138,7 @@
                 <div class="col-md-4">
                     <form method="GET" id="filterForm">
                         <input type="hidden" name="form_name" value="type_filter">
-                        <label class="small text-white mb-1 ">Status Filter</label>
+                        <label class="small text-white mb-1">Status Filter</label>
                         <select name="filter" class="form-select form-select-sm" onchange="this.form.submit()">
                             <option value="all_papers" {% if filter_option == 'all_papers' %}selected{% endif %}>All Papers</option>
                             <option value="only_pdf_available" {% if filter_option == 'only_pdf_available' %}selected{% endif %}>PDF Available</option>
@@ -148,7 +156,7 @@
                                 {% for cat in categories %}
                                 <div class="form-check form-check-inline m-0 me-3">
                                     <input class="form-check-input" type="checkbox" name="category" value="{{ cat.id }}" id="top_cat{{ cat.id }}" {% if cat.id|stringformat:"s" in category_filter %}checked{% endif %}>
-                                    <label class="form-check-label" for="top_cat{{ cat.id }}">{{ cat.name }}</label>
+                                    <label class="form-check-label text-white" style="font-size: 0.8rem;" for="top_cat{{ cat.id }}">{{ cat.name }}</label>
                                 </div>
                                 {% endfor %}
                             </div>
@@ -162,9 +170,9 @@
 
     <main class="container pb-5">
         {% for paper in papers %}
-            <div class="card paper-card mb-4 shadow-sm">
+            <div class="card paper-card shadow-sm" style="animation-delay: 0.{{ forloop.counter }}s">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <div class="btn-group shadow-sm">
+                    <div class="btn-group">
                         {% if paper.adsurl %}<a class="btn btn-sm btn-outline-light" href="{{ paper.adsurl }}">ADS</a>{% endif %}
                         {% if paper.doi %}<a class="btn btn-sm btn-outline-light" href="https://doi.org/{{ paper.doi }}">DOI</a>{% endif %}
                         {% if paper.arxiv %}<a class="btn btn-sm btn-outline-light" href="{{ paper.arxiv }}">arXiv</a>{% endif %}
@@ -172,38 +180,36 @@
                     </div>
                     <div class="d-flex align-items-center gap-3">
                         <a href="{% url 'papers:manage_notes' paper.id %}" class="btn btn-sm btn-link text-info text-decoration-none small"><i class="bi bi-pencil-square"></i> Notes</a>
-                        <a href="{% url 'papers:read_notes' paper.id %}" class="btn btn-sm btn-link text-info text-decoration-none small"><i class="bi bi-eye"></i> Read Notes</a>
+                        <a href="{% url 'papers:read_notes' paper.id %}" class="btn btn-sm btn-link text-info text-decoration-none small"><i class="bi bi-eye"></i> Read</a>
                         <span class="badge bg-primary px-3 py-2">{{ paper.year }}</span>
                     </div>
-
                 </div>
                 
-                <div class="card-body">
+                <div class="card-body p-4">
                     <div class="row g-4">
                         <div class="col-lg-9">
-                            <h5 class="card-title fw-bold mb-2">
-                                <span class="text-white me-2 small">{{forloop.counter}}.</span>{{ paper.title }}
+                            <h5 class="card-title fw-bold mb-3 text-white">
+                                <span class="text-info me-2">{{ forloop.counter }}.</span>{{ paper.title }}
                             </h5>
                             
-                            <div class="mb-3 d-flex flex-wrap gap-2">
+                            <div class="mb-4 d-flex flex-wrap gap-2">
                                 <span class="badge bg-dark border border-secondary text-info fw-normal">{{ paper.key }}</span>
                                 {% for cat in paper.categories.all %}
                                 <span class="badge badge-category">{{ cat.name }}</span>
                                 {% endfor %}
                             </div>
 
-                            <div class="d-flex gap-2 flex-wrap">
+                            <div class="d-flex gap-2 flex-wrap mb-3">
                                 <a class="btn btn-sm btn-success px-4" href="/papers/pdf/{{ paper.key }}.pdf" target="_blank">
                                     <i class="bi bi-file-earmark-pdf"></i> PDF
                                 </a>
                                 <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#abs{{ paper.id }}">Abstract</button>
                                 <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#bib{{ paper.id }}">Source</button>
-
                             </div>
 
                             <div class="collapse mt-3" id="abs{{ paper.id }}">
                                 <div class="p-3 bg-dark rounded small text-light border-start border-info border-4">
-                                    {{ paper.abstract|default:"No abstract available for this entry." }}
+                                    {{ paper.abstract|default:"No abstract available." }}
                                 </div>
                             </div>
                             <div class="collapse mt-3" id="bib{{ paper.id }}">
@@ -214,20 +220,18 @@
                         <div class="col-lg-3 border-start border-color">
                             <form method="post" action="{% url 'papers:update_categories' paper.id %}">
                                 {% csrf_token %}
-                                <p class="small text-contrast-label text-uppercase mb-2" style="font-size: 0.75rem; letter-spacing: 0.05em;">Categories</p>
-                                
+                                <p class="small text-uppercase mb-2 fw-bold text-muted" style="font-size: 0.7rem;">Quick Update</p>
                                 <div class="category-sidebar-list mb-2">
                                     {% for cat in categories %}
                                     <div class="form-check mb-1">
                                         <input class="form-check-input" type="checkbox" name="categories" value="{{ cat.id }}" id="p{{ paper.id }}c{{ cat.id }}" {% if cat in paper.categories.all %}checked{% endif %}>
-                                        <label class="form-check-label" for="p{{ paper.id }}c{{ cat.id }}">
+                                        <label class="form-check-label text-white-50" style="font-size: 0.8rem;" for="p{{ paper.id }}c{{ cat.id }}">
                                             {{ cat.name }}
                                         </label>
                                     </div>
                                     {% endfor %}
                                 </div>
-
-                                <button type="submit" class="btn btn-sm btn-warning w-100 fw-bold py-1">Update</button>
+                                <button type="submit" class="btn btn-sm btn-warning w-100 fw-bold">Update</button>
                             </form>
                         </div>
                     </div>
@@ -258,26 +262,57 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+
     <script>
-    function copyBibtex(paperKey, rawBibtex) {
-        if (!rawBibtex) { showToast("No BibTeX available", "danger"); return; }
-        const modified = rawBibtex.replace(/@(\w+)\s*\{[^,]*,/, (_, type) => `@${type}{${paperKey},`);
-        navigator.clipboard.writeText(modified).then(() => showToast(`Copied BibTeX for ${paperKey}`));
+    /* Three.js Background Logic */
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+    const group = new THREE.Group();
+    scene.add(group);
+
+    const particlesCount = 120;
+    const geo = new THREE.SphereGeometry(0.02, 8, 8);
+    const mat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+    
+    for (let i = 0; i < particlesCount; i++) {
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set((Math.random()-0.5)*15, (Math.random()-0.5)*15, (Math.random()-0.5)*10);
+        mesh.userData.velocity = new THREE.Vector3((Math.random()-0.5)*0.01, (Math.random()-0.5)*0.01, (Math.random()-0.5)*0.01);
+        group.add(mesh);
     }
 
-    function showToast(message, variant="success") {
-        const toast = document.createElement("div");
-        toast.innerText = message;
-        Object.assign(toast.style, {
-            position: "fixed", bottom: "30px", right: "30px",
-            background: variant === "success" ? "#10b981" : "#ef4444",
-            color: "white", padding: "12px 24px", borderRadius: "8px",
-            zIndex: "9999", fontWeight: "600", boxShadow: "0 10px 20px rgba(0,0,0,0.4)"
+    camera.position.z = 5;
+
+    function animate() {
+        requestAnimationFrame(animate);
+        group.children.forEach(p => {
+            p.position.add(p.userData.velocity);
+            if(Math.abs(p.position.x) > 8) p.userData.velocity.x *= -1;
+            if(Math.abs(p.position.y) > 8) p.userData.velocity.y *= -1;
         });
-        document.body.appendChild(toast);
-        setTimeout(() => { toast.style.opacity = "0"; toast.style.transition = "0.5s"; }, 2000);
-        setTimeout(() => toast.remove(), 2600);
+        group.rotation.y += 0.001;
+        renderer.render(scene, camera);
     }
+    animate();
+
+    /* Original JS Functions */
+    function copyBibtex(paperKey, rawBibtex) {
+        if (!rawBibtex) return;
+        const modified = rawBibtex.replace(/@(\w+)\s*\{[^,]*,/, (_, type) => `@${type}{${paperKey},`);
+        navigator.clipboard.writeText(modified);
+        alert(`Copied: ${paperKey}`);
+    }
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
     </script>
 </body>
 </html>
