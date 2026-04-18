@@ -205,7 +205,8 @@ def manage_notes(request, paper_id):
                 f"{request.path}?statement={stmt.id}"
             )
     else:
-        form = StatementForm(instance=statement)
+        form = StatementForm(instance=statement, initial={"paper": paper})
+        
 
     grouped = {}
     for s in paper.statements.prefetch_related("citations"):
