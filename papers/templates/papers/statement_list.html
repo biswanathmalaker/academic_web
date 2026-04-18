@@ -1,69 +1,327 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h2>Statements</h2>
+<style>
+:root {
+    --bg-main: #020617;
+    --bg-card: #111827;
+    --bg-deep: #0f172a;
+    --accent-primary: #38bdf8;
+    --accent-green: #4ade80;
+    --text-high: #e2e8f0;
+    --text-medium: #cbd5e1;
+    --text-muted: #64748b;       /* was #010812 — now actually readable */
+    --text-subtle: #94a3b8;
+    --border-color: #1e293b;
+    --border-blue: #1e3a5f;
+}
 
-<form method="get" style="margin-bottom: 1em;">
-    <label for="topics"><strong>Filter by Topics:</strong></label><br>
+body {
+    background-color: var(--bg-main);
+    color: var(--text-medium);
+}
 
-    <select name="topics" id="topics" multiple size="8" style="min-width: 300px;">
-        {% for topic in topics %}
-            <option value="{{ topic.id }}"
-                {% if topic.id in selected_topics %}selected{% endif %}>
-                {{ topic.name }}
-            </option>
-        {% endfor %}
-    </select>
+.card {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 14px;
+}
 
-    <br><br>
-    <button type="submit">Apply Filter</button>
-    <a href="{% url 'papers:statement_list' %}">Reset</a>
-    <a href="{% url 'papers:statements_by_topic_print' %}">Print</a>
-</form>
+/* Table */
+.table {
+    color: var(--text-medium);
+    font-size: 13px;
+}
 
-<hr>
+.table thead tr {
+    background: var(--bg-deep);
+}
 
-<table border="1" cellpadding="6" cellspacing="0" width="100%">
-<thead>
-  <tr>
-    <th>Paper</th>
-    <th>Year</th>
-    <th>Section</th>
-    <th>Topic</th>
-    <th>Statement</th>
-    <th>Page</th>
-    <th>Citations</th>
-    <th>Actions</th>
-  </tr>
-</thead>
+.table thead th {
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    border-bottom: 1px solid var(--border-color);
+    padding: 11px 14px;
+    white-space: nowrap;
+}
 
-<tbody>
-{% for stmt in statements %}
-<tr>
-  <td>
-    <strong>{{ stmt.paper.key }}</strong><br>
-    {{ stmt.paper.title|default:"(No title)" }}
-  </td>
-  <td>{{ stmt.paper.year }}</td>
-  <td>{{ stmt.get_section_display }}</td>
-  <td>{{ stmt.topic }}</td>
-  <td style="max-width: 500px;">{{ stmt.text }}</td>
-  <td>{{ stmt.page_number }}</td>
-  <td>
-    {% for c in stmt.citations.all %}
-      {{ c.citation }}{% if not forloop.last %}, {% endif %}
-    {% empty %}—{% endfor %}
-  </td>
-  <td>
-    <a class="btn btn-sm btn-outline-primary"
-       href="{% url 'papers:manage_notes' stmt.paper.id %}?statement={{ stmt.id }}">
-       Edit
-    </a>
-  </td>
-</tr>
-{% endfor %}
-</tbody>
+.table tbody tr {
+    border-bottom: 1px solid #1a2236;
+    transition: background 0.15s;
+}
 
-</table>
+.table tbody tr:hover {
+    background: rgba(14, 165, 233, 0.07);
+}
+
+.table td {
+    padding: 11px 14px;
+    vertical-align: middle;
+}
+
+/* Force dark background — Bootstrap overrides td directly */
+.table {
+    --bs-table-bg: #111827;
+    --bs-table-striped-bg: #111827;
+    --bs-table-hover-bg: #0f1e30;
+    --bs-table-color: #cbd5e1;
+    color: #cbd5e1;
+    background-color: #111827;
+}
+
+.table > :not(caption) > * > * {
+    background-color: #111827 !important;
+    color: #cbd5e1;
+    border-bottom-color: #1a2236;
+}
+
+.table > thead > * > * {
+    background-color: #0a0f1e !important;
+    color: #64748b;
+}
+
+.table tbody tr:hover > * {
+    background-color: #0f1e30 !important;
+    color: #cbd5e1;
+}
+
+
+/* Statement text — explicit color, no variable dependency */
+.stmt-text {
+    color: #e2e8f0 !important;
+    font-size: 13px;
+    line-height: 1.6;
+    max-width: 380px;
+}
+
+
+/* Paper key + title */
+.paper-key {
+    font-weight: 500;
+    color: var(--accent-primary);
+    font-size: 13px;
+}
+
+.paper-title {
+    color: var(--text-muted);   /* slate-600, readable */
+    font-size: 12px;
+    max-width: 160px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Year / page */
+.cell-year, .cell-page {
+    color: var(--text-subtle);
+    font-size: 13px;
+}
+
+/* Badges */
+.badge-section {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: rgba(14, 165, 233, 0.12);
+    color: #38bdf8;
+    border: 1px solid rgba(14, 165, 233, 0.3);
+}
+
+.badge-topic {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: rgba(34, 197, 94, 0.12);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+/* Statement text */
+.stmt-text {
+    color: var(--text-high);
+    font-size: 13px;
+    line-height: 1.6;
+    max-width: 380px;
+}
+
+/* Citation buttons */
+.citation-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    padding: 3px 9px;
+    margin: 2px;
+    border-radius: 6px;
+    border: 1px solid var(--border-blue);
+    background: var(--bg-deep);
+    color: #7dd3fc;
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+.citation-btn:hover {
+    background: #0ea5e9;
+    color: #fff;
+    border-color: #0ea5e9;
+}
+
+/* Edit button */
+.btn-edit {
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 7px;
+    border: 1px solid var(--border-blue);
+    background: transparent;
+    color: #7dd3fc;
+    transition: 0.15s;
+}
+
+.btn-edit:hover {
+    background: rgba(14, 165, 233, 0.1);
+    color: var(--accent-primary);
+}
+
+/* Filter label */
+.filter-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+}
+
+/* Filter select */
+.form-select {
+    background-color: var(--bg-deep) !important;
+    border: 1px solid var(--border-blue) !important;
+    color: var(--text-high) !important;
+    border-radius: 8px;
+}
+</style>
+
+<div class="container-fluid mt-3">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0" style="color: var(--text-high);">Statements</h2>
+    <div class="d-flex gap-2">
+      <a href="{% url 'papers:statements_by_topic_print' %}" class="btn btn-sm btn-outline-secondary" style="color: var(--text-subtle); border-color: #475569;">Print</a>
+      <a href="{% url 'papers:statement_list' %}" class="btn btn-sm" style="color: #f87171; border: 1px solid #7f1d1d; background: transparent;">Reset</a>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <form method="get">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="filter-label">Filter by topics</div>
+            <select name="topics" multiple class="form-select" size="8">
+              {% for topic in topics %}
+                <option value="{{ topic.id }}"
+                  {% if topic.id in selected_topics %}selected{% endif %}>
+                  {{ topic.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-8 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary">Apply filter</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+
+          <thead>
+            <tr>
+              <th>Paper</th>
+              <th>Year</th>
+              <th>Section</th>
+              <th>Topic</th>
+              <th style="min-width: 300px;">Statement</th>
+              <th>Page</th>
+              <th>Citations</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+          {% for stmt in statements %}
+            <tr>
+
+              <td>
+                <div class="paper-key">{{ stmt.paper.key }}</div>
+                <div class="paper-title">{{ stmt.paper.title|default:"(No title)" }}</div>
+              </td>
+
+              <td class="cell-year">{{ stmt.paper.year }}</td>
+
+              <td>
+                <span class="badge-section">{{ stmt.get_section_display }}</span>
+              </td>
+
+              <td>
+                <span class="badge-topic">{{ stmt.topic }}</span>
+              </td>
+
+              <td>
+                <div class="stmt-text">{{ stmt.text }}</div>
+              </td>
+
+              <td class="cell-page">{{ stmt.page_number|default:"—" }}</td>
+
+              <td>
+                {% for c in stmt.citations.all %}
+                  <button class="citation-btn"
+                          onclick="copyBibtex('{{ c.key }}', `{{ c.bibtex|escapejs }}`)">
+                    {{ c.citation }}
+                  </button>
+                {% empty %}
+                  <span style="color: var(--border-color);">—</span>
+                {% endfor %}
+              </td>
+
+              <td>
+                <a class="btn-edit"
+                   href="{% url 'papers:manage_notes' stmt.paper.id %}?statement={{ stmt.id }}">
+                  Edit
+                </a>
+              </td>
+
+            </tr>
+          {% endfor %}
+          </tbody>
+
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function copyBibtex(paperKey, rawBibtex) {
+    if (!rawBibtex) return;
+    const modified = rawBibtex.replace(/@(\w+)\s*\{[^,]*,/, (_, type) => `@${type}{${paperKey},`);
+    navigator.clipboard.writeText(modified);
+}
+</script>
 
 {% endblock %}

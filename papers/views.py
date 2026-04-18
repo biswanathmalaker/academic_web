@@ -201,9 +201,10 @@ def manage_notes(request, paper_id):
             stmt.paper = paper
             stmt.save()
             form.save_m2m()
-            return redirect(
-                f"{request.path}?statement={stmt.id}"
-            )
+            # return redirect(
+                # f"{request.path}?statement={stmt.id}"
+            # )
+            return redirect(request.path)
     else:
         form = StatementForm(instance=statement, initial={"paper": paper})
         
