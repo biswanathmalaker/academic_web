@@ -9,13 +9,10 @@
 
     <style>
         :root {
-            /* Deeper dark background with a hint of navy for glass contrast */
             --bg-main: #020617; 
-            /* Glass properties: semi-transparent white */
             --glass-bg: rgba(255, 255, 255, 0.04);
             --glass-border: rgba(255, 255, 255, 0.1);
             --glass-header: rgba(255, 255, 255, 0.06);
-            
             --accent-primary: #38bdf8;
             --accent-secondary: #818cf8;
             --text-high: #ffffff;
@@ -24,7 +21,6 @@
         }
 
         body {
-            /* Added a subtle gradient to make the glass blur visible */
             background: radial-gradient(circle at top right, #0f172a, #020617);
             background-attachment: fixed;
             color: var(--text-medium);
@@ -43,7 +39,6 @@
             pointer-events: none;
         }
 
-        /* --- Glassmorphism Components --- */
         .sticky-filter-header {
             position: sticky;
             top: 0;
@@ -84,7 +79,6 @@
             border-top-right-radius: 20px !important;
         }
 
-        /* --- Sidebar & Forms --- */
         .category-sidebar-list {
             max-height: 150px; 
             overflow-y: auto;
@@ -97,17 +91,14 @@
         .category-sidebar-list::-webkit-scrollbar { width: 4px; }
         .category-sidebar-list::-webkit-scrollbar-thumb { background: var(--accent-secondary); border-radius: 10px; }
 
-
-        /* Container for the filter */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.03) !important; /* Very transparent */
+            background: rgba(255, 255, 255, 0.03) !important;
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
         }
 
-        /* The Select Menu specifically */
         .glass-input {
             background-color: rgba(255, 255, 255, 0.05) !important;
             backdrop-filter: blur(5px);
@@ -124,13 +115,11 @@
             box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.25);
         }
 
-        /* Style the options inside (Note: Browsers limit how much you can style <option>) */
         .glass-input option {
-            background-color: #0f172a; /* Solid dark color so text is readable in dropdown */
+            background-color: #0f172a;
             color: white;
         }
 
-        
         .form-select, .form-control {
             background: rgba(255, 255, 255, 0.05) !important;
             border: 1px solid var(--glass-border) !important;
@@ -164,6 +153,14 @@
 
         .border-glass-separator {
             border-color: var(--glass-border) !important;
+        }
+
+        /* Fix: ensure modals always sit above everything */
+        .modal-backdrop {
+            z-index: 1050 !important;
+        }
+        .modal {
+            z-index: 1055 !important;
         }
 
         @keyframes fadeIn {
@@ -262,15 +259,31 @@
                                 <a class="btn btn-sm btn-outline-secondary px-4" href="/papers/pdf/{{ paper.key }}.pdf" target="_blank">
                                     <i class="bi bi-file-earmark-pdf"></i> PDF
                                 </a>
-                                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#abs{{ paper.id }}">Abstract</button>
-                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#bib{{ paper.id }}">Source</button>
+
+                                {% if paper.abstract %}
+                                    <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#abs{{ paper.id }}">
+                                        Abstract
+                                    </button>
+                                {% else %}
+                                    <!-- Button only — modal lives outside the card loop below -->
+                                    <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#addAbstractModal{{ paper.id }}">
+                                        ➕ Add Abstract
+                                    </button>
+                                {% endif %}
+
+                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#bib{{ paper.id }}">
+                                    Source
+                                </button>
                             </div>
 
+                            {% if paper.abstract %}
                             <div class="collapse mt-3" id="abs{{ paper.id }}">
                                 <div class="p-3 bg-glass-dark rounded small text-light border-start border-info border-4">
-                                    {{ paper.abstract|default:"No abstract available." }}
+                                    {{ paper.abstract }}
                                 </div>
                             </div>
+                            {% endif %}
+
                             <div class="collapse mt-3" id="bib{{ paper.id }}">
                                 <pre class="bibtex-pre">{{ paper.bibtex }}</pre>
                             </div>
@@ -297,8 +310,43 @@
                 </div>
             </div>
         {% endfor %}
+
+        <!-- =====================================================
+             ALL ABSTRACT MODALS — rendered outside card loop
+             so card's CSS transform doesn't trap the stacking context
+             ===================================================== -->
+        {% for paper in papers %}
+            {% if not paper.abstract %}
+            <div class="modal fade" id="addAbstractModal{{ paper.id }}" tabindex="-1" aria-labelledby="abstractModalLabel{{ paper.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content" style="background: rgba(15, 23, 42, 0.95) !important; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 20px;">
+                        <div class="modal-header border-glass-separator">
+                            <h5 class="modal-title text-white" id="abstractModalLabel{{ paper.id }}">
+                                Add Abstract
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="small text-muted mb-3">{{ paper.title }}</p>
+                            <form method="post" action="{% url 'papers:add_abstract' paper.id %}">
+                                {% csrf_token %}
+                                <textarea name="abstract" rows="8" class="form-control mb-3"
+                                    placeholder="Write or paste abstract here..."></textarea>
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary px-4">Save Abstract</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+
     </main>
 
+    <!-- Add Paper Modal -->
     <div class="modal fade" id="addPaperModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content" style="background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 20px;">
