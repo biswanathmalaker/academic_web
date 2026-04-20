@@ -7,6 +7,9 @@ class Book(models.Model):
 
     class Meta:
         ordering = ['order']
+        
+    def __str__(self):
+        return self.book_name
 
 
 
