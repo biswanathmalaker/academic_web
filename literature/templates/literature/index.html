@@ -2,141 +2,63 @@
 <html>
 <head>
     <title>Literature App</title>
-    <!-- KaTeX for rendering LaTeX in notes -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 20px;
-        }
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 20px auto; padding: 0 20px; }
 
         .draggable-chapter, .draggable-section, .draggable-subsection, .draggable-subsubsection {
-            cursor: move;
-            padding: 10px;
-            margin: 5px 0;
-            background: #f0f0f0;
-            border-radius: 4px;
-            border-left: 4px solid #666;
+            cursor: move; padding: 10px; margin: 5px 0;
+            background: #f0f0f0; border-radius: 4px; border-left: 4px solid #666;
         }
-        .draggable-section   { background: #f5f5f5; border-left-color: #888; }
-        .draggable-subsection { background: #fafafa; border-left-color: #aaa; }
+        .draggable-section       { background: #f5f5f5; border-left-color: #888; }
+        .draggable-subsection    { background: #fafafa; border-left-color: #aaa; }
         .draggable-subsubsection { background: #fdfdfd; border-left-color: #ccc; }
-
         .sortable-ghost { opacity: 0.4; background: #c8ebfb; }
 
         .chapter-list, .section-list, .subsection-list, .subsubsection-list {
-            list-style: none;
-            padding-left: 20px;
+            list-style: none; padding-left: 20px;
         }
-
         .action-links { font-size: 0.9em; margin-top: 5px; }
-        .action-links a {
-            margin-right: 10px;
-            text-decoration: none;
-            color: #0066cc;
-        }
+        .action-links a { margin-right: 10px; text-decoration: none; color: #0066cc; }
         .action-links a:hover { text-decoration: underline; }
         .view-codes-link { color: #009900; font-weight: bold; }
 
-        .code-count {
-            background: #009900;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 0.8em;
-            margin-left: 5px;
-        }
-        .note-count {
-            background: #6644cc;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 0.8em;
-            margin-left: 5px;
-        }
+        .code-count { background: #009900; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; margin-left: 5px; }
+        .note-count { background: #6644cc; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; margin-left: 5px; }
 
         h1, h2 { color: #333; }
-
-        .top-actions {
-            background: #e8e8e8;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
+        .top-actions { background: #e8e8e8; padding: 10px; border-radius: 5px; margin-bottom: 20px; }
         .book-list { list-style: none; padding-left: 0; }
-        .draggable-book {
-            cursor: move;
-            padding: 15px;
-            margin-bottom: 20px;
-            background: #e0e0e0;
-            border-radius: 6px;
-            border-left: 6px solid #444;
-        }
+        .draggable-book { cursor: move; padding: 15px; margin-bottom: 20px; background: #e0e0e0; border-radius: 6px; border-left: 6px solid #444; }
 
-        /* ── Note rendering ─────────────────────────────────────────── */
-        .note-list {
-            list-style: none;
-            padding-left: 0;
-            margin: 8px 0 4px 0;
-        }
+        /* Notes */
+        .note-list { list-style: none; padding-left: 0; margin: 8px 0 4px 0; }
+        .draggable-note { cursor: move; background: #fffef5; border: 1px solid #e0d880; border-left: 4px solid #c8b400; border-radius: 5px; padding: 10px 14px; margin: 6px 0; }
+        .note-title { font-weight: bold; color: #5a4800; margin-bottom: 6px; font-size: 0.95em; }
 
-        .draggable-note {
-            cursor: move;
-            background: #fffef5;
-            border: 1px solid #e0d880;
-            border-left: 4px solid #c8b400;
-            border-radius: 5px;
-            padding: 10px 14px;
-            margin: 6px 0;
-        }
+        .note-body            { font-size: 0.95em; line-height: 1.7; color: #222; }
+        .note-body p          { margin: 0.3em 0; }
+        .note-body ul         { padding-left: 1.4em; margin: 0.3em 0; list-style: disc; }
+        .note-body ol         { padding-left: 1.4em; margin: 0.3em 0; list-style: decimal; }
+        .note-body li         { margin: 0.15em 0; }
+        .note-body h1         { font-size: 1.4em;  margin: 0.5em 0 0.2em; }
+        .note-body h2         { font-size: 1.2em;  margin: 0.5em 0 0.2em; }
+        .note-body h3         { font-size: 1.05em; margin: 0.4em 0 0.15em; }
+        .note-body strong     { font-weight: bold; }
+        .note-body em         { font-style: italic; }
+        .note-body img        { max-width: 100%; border-radius: 4px; margin: 6px 0; display: block; }
 
-        .note-title {
-            font-weight: bold;
-            color: #5a4800;
-            margin-bottom: 6px;
-            font-size: 0.95em;
-        }
-
-        /* TipTap rendered content styles */
-        .note-body { font-size: 0.95em; line-height: 1.7; color: #222; }
-        .note-body p  { margin: 0.3em 0; }
-        .note-body ul { padding-left: 1.4em; margin: 0.3em 0; list-style: disc; }
-        .note-body ol { padding-left: 1.4em; margin: 0.3em 0; list-style: decimal; }
-        .note-body li { margin: 0.15em 0; }
-        .note-body h1 { font-size: 1.4em; margin: 0.5em 0 0.2em; }
-        .note-body h2 { font-size: 1.2em; margin: 0.5em 0 0.2em; }
-        .note-body h3 { font-size: 1.05em; margin: 0.4em 0 0.15em; }
-        .note-body img {
-            max-width: 100%;
-            border-radius: 4px;
-            margin: 6px 0;
-            display: block;
-        }
-        .note-body strong { font-weight: bold; }
-        .note-body em { font-style: italic; }
-
-        /* LaTeX rendered nodes */
-        .latex-inline {
-            display: inline-block;
-            vertical-align: middle;
-            margin: 0 2px;
-        }
-        .latex-block {
-            display: block;
-            text-align: center;
-            margin: 10px 0;
-            overflow-x: auto;
-        }
+        .latex-inline { display: inline-block; vertical-align: middle; margin: 0 2px; }
+        .latex-block  { display: block; text-align: center; margin: 10px 0; overflow-x: auto; }
 
         .note-actions { font-size: 0.85em; margin-top: 6px; }
         .note-actions a { margin-right: 8px; text-decoration: none; color: #0066cc; }
         .note-actions a:hover { text-decoration: underline; }
         .note-actions a.del { color: #cc0000; }
+
+        .note-error { color: #999; font-style: italic; font-size: 0.85em; }
     </style>
 </head>
 <body>
@@ -158,8 +80,7 @@
         <p>{{ book.preface }}</p>
         <div class="action-links">
             <a href="{% url 'literature:update_book' book.id %}">✏️ Edit Book</a>
-            <a href="{% url 'literature:delete_book' book.id %}"
-               onclick="return confirm('Delete this book and all its content?')">🗑️ Delete Book</a>
+            <a href="{% url 'literature:delete_book' book.id %}" onclick="return confirm('Delete this book and all its content?')">🗑️ Delete Book</a>
             <a href="{% url 'literature:add_chapter' %}?book={{ book.id }}">➕ Add Chapter</a>
         </div>
 
@@ -167,26 +88,19 @@
         {% for chapter in book.chapters.all %}
             <li class="draggable-chapter" data-chapter-id="{{ chapter.id }}">
                 <b>Chapter: {{ chapter.chapter_name }}</b>
-                {% if chapter.codes.count > 0 %}
-                    <span class="code-count">{{ chapter.codes.count }} code(s)</span>
-                {% endif %}
-                {% if chapter.notes.count > 0 %}
-                    <span class="note-count">{{ chapter.notes.count }} note(s)</span>
-                {% endif %}
-                <br>
-                <small>{{ chapter.chapter_introduction }}</small>
+                {% if chapter.codes.count > 0 %}<span class="code-count">{{ chapter.codes.count }} code(s)</span>{% endif %}
+                {% if chapter.notes.count > 0 %}<span class="note-count">{{ chapter.notes.count }} note(s)</span>{% endif %}
+                <br><small>{{ chapter.chapter_introduction }}</small>
 
-                <!-- Chapter Notes -->
                 {% if chapter.notes.exists %}
-                <ul class="note-list" id="note-list-chapter-{{ chapter.id }}" data-parent-type="chapter" data-parent-id="{{ chapter.id }}">
+                <ul class="note-list" id="note-list-chapter-{{ chapter.id }}">
                 {% for note in chapter.notes.all %}
                     <li class="draggable-note" data-note-id="{{ note.id }}">
                         {% if note.title %}<div class="note-title">📝 {{ note.title }}</div>{% endif %}
-                        <div class="note-body" data-content='{{ note.content|default:"{}" | escapejs }}'></div>
+                        <div class="note-body">{{ note.content|json_script:note.id }}</div>
                         <div class="note-actions">
                             <a href="{% url 'literature:edit_note' note.id %}">✏️ Edit Note</a>
-                            <a href="{% url 'literature:delete_note' note.id %}" class="del"
-                               onclick="return confirm('Delete this note?')">🗑️ Delete</a>
+                            <a href="{% url 'literature:delete_note' note.id %}" class="del" onclick="return confirm('Delete this note?')">🗑️ Delete</a>
                         </div>
                     </li>
                 {% endfor %}
@@ -199,35 +113,26 @@
                     <a href="{% url 'literature:add_section' %}?chapter={{ chapter.id }}">➕ Add Section</a>
                     <a href="{% url 'literature:add_code' %}?chapter={{ chapter.id }}">💻 Add Code</a>
                     <a href="{% url 'literature:add_note' %}?chapter={{ chapter.id }}" style="color:#6644cc;">📝 Add Note</a>
-                    {% if chapter.codes.count > 0 %}
-                        <a href="{% url 'literature:view_codes' %}?chapter={{ chapter.id }}" class="view-codes-link">👁️ View Codes</a>
-                    {% endif %}
+                    {% if chapter.codes.count > 0 %}<a href="{% url 'literature:view_codes' %}?chapter={{ chapter.id }}" class="view-codes-link">👁️ View Codes</a>{% endif %}
                 </div>
 
                 <ul class="section-list" id="section-list-{{ chapter.id }}" data-chapter-id="{{ chapter.id }}">
                 {% for section in chapter.sections.all %}
                     <li class="draggable-section" data-section-id="{{ section.id }}">
                         <b>Section: {{ section.section_name }}</b>
-                        {% if section.codes.count > 0 %}
-                            <span class="code-count">{{ section.codes.count }} code(s)</span>
-                        {% endif %}
-                        {% if section.notes.count > 0 %}
-                            <span class="note-count">{{ section.notes.count }} note(s)</span>
-                        {% endif %}
-                        <br>
-                        <small>{{ section.section_introduction }}</small>
+                        {% if section.codes.count > 0 %}<span class="code-count">{{ section.codes.count }} code(s)</span>{% endif %}
+                        {% if section.notes.count > 0 %}<span class="note-count">{{ section.notes.count }} note(s)</span>{% endif %}
+                        <br><small>{{ section.section_introduction }}</small>
 
-                        <!-- Section Notes -->
                         {% if section.notes.exists %}
-                        <ul class="note-list" id="note-list-section-{{ section.id }}" data-parent-type="section" data-parent-id="{{ section.id }}">
+                        <ul class="note-list" id="note-list-section-{{ section.id }}">
                         {% for note in section.notes.all %}
                             <li class="draggable-note" data-note-id="{{ note.id }}">
                                 {% if note.title %}<div class="note-title">📝 {{ note.title }}</div>{% endif %}
-                                <div class="note-body" data-content='{{ note.content|default:"{}" | escapejs }}'></div>
+                                <div class="note-body">{{ note.content|json_script:note.id }}</div>
                                 <div class="note-actions">
                                     <a href="{% url 'literature:edit_note' note.id %}">✏️ Edit Note</a>
-                                    <a href="{% url 'literature:delete_note' note.id %}" class="del"
-                                       onclick="return confirm('Delete this note?')">🗑️ Delete</a>
+                                    <a href="{% url 'literature:delete_note' note.id %}" class="del" onclick="return confirm('Delete this note?')">🗑️ Delete</a>
                                 </div>
                             </li>
                         {% endfor %}
@@ -240,35 +145,26 @@
                             <a href="{% url 'literature:add_subsection' %}?section={{ section.id }}">➕ Add Subsection</a>
                             <a href="{% url 'literature:add_code' %}?section={{ section.id }}">💻 Add Code</a>
                             <a href="{% url 'literature:add_note' %}?section={{ section.id }}" style="color:#6644cc;">📝 Add Note</a>
-                            {% if section.codes.count > 0 %}
-                                <a href="{% url 'literature:view_codes' %}?section={{ section.id }}" class="view-codes-link">👁️ View Codes</a>
-                            {% endif %}
+                            {% if section.codes.count > 0 %}<a href="{% url 'literature:view_codes' %}?section={{ section.id }}" class="view-codes-link">👁️ View Codes</a>{% endif %}
                         </div>
 
                         <ul class="subsection-list" id="subsection-list-{{ section.id }}" data-section-id="{{ section.id }}">
                         {% for subsection in section.subsections.all %}
                             <li class="draggable-subsection" data-subsection-id="{{ subsection.id }}">
                                 <b>Subsection: {{ subsection.subsection_name }}</b>
-                                {% if subsection.codes.count > 0 %}
-                                    <span class="code-count">{{ subsection.codes.count }} code(s)</span>
-                                {% endif %}
-                                {% if subsection.notes.count > 0 %}
-                                    <span class="note-count">{{ subsection.notes.count }} note(s)</span>
-                                {% endif %}
-                                <br>
-                                <small>{{ subsection.subsection_introduction }}</small>
+                                {% if subsection.codes.count > 0 %}<span class="code-count">{{ subsection.codes.count }} code(s)</span>{% endif %}
+                                {% if subsection.notes.count > 0 %}<span class="note-count">{{ subsection.notes.count }} note(s)</span>{% endif %}
+                                <br><small>{{ subsection.subsection_introduction }}</small>
 
-                                <!-- Subsection Notes -->
                                 {% if subsection.notes.exists %}
-                                <ul class="note-list" id="note-list-subsection-{{ subsection.id }}" data-parent-type="subsection" data-parent-id="{{ subsection.id }}">
+                                <ul class="note-list" id="note-list-subsection-{{ subsection.id }}">
                                 {% for note in subsection.notes.all %}
                                     <li class="draggable-note" data-note-id="{{ note.id }}">
                                         {% if note.title %}<div class="note-title">📝 {{ note.title }}</div>{% endif %}
-                                        <div class="note-body" data-content='{{ note.content|default:"{}" | escapejs }}'></div>
+                                        <div class="note-body">{{ note.content|json_script:note.id }}</div>
                                         <div class="note-actions">
                                             <a href="{% url 'literature:edit_note' note.id %}">✏️ Edit Note</a>
-                                            <a href="{% url 'literature:delete_note' note.id %}" class="del"
-                                               onclick="return confirm('Delete this note?')">🗑️ Delete</a>
+                                            <a href="{% url 'literature:delete_note' note.id %}" class="del" onclick="return confirm('Delete this note?')">🗑️ Delete</a>
                                         </div>
                                     </li>
                                 {% endfor %}
@@ -281,35 +177,26 @@
                                     <a href="{% url 'literature:add_subsubsection' %}?subsection={{ subsection.id }}">➕ Add SubSubsection</a>
                                     <a href="{% url 'literature:add_code' %}?subsection={{ subsection.id }}">💻 Add Code</a>
                                     <a href="{% url 'literature:add_note' %}?subsection={{ subsection.id }}" style="color:#6644cc;">📝 Add Note</a>
-                                    {% if subsection.codes.count > 0 %}
-                                        <a href="{% url 'literature:view_codes' %}?subsection={{ subsection.id }}" class="view-codes-link">👁️ View Codes</a>
-                                    {% endif %}
+                                    {% if subsection.codes.count > 0 %}<a href="{% url 'literature:view_codes' %}?subsection={{ subsection.id }}" class="view-codes-link">👁️ View Codes</a>{% endif %}
                                 </div>
 
                                 <ul class="subsubsection-list" id="subsubsection-list-{{ subsection.id }}" data-subsection-id="{{ subsection.id }}">
                                 {% for subsubsection in subsection.subsubsections.all %}
                                     <li class="draggable-subsubsection" data-subsubsection-id="{{ subsubsection.id }}">
                                         <b>SubSubsection: {{ subsubsection.subsubsection_name }}</b>
-                                        {% if subsubsection.codes.count > 0 %}
-                                            <span class="code-count">{{ subsubsection.codes.count }} code(s)</span>
-                                        {% endif %}
-                                        {% if subsubsection.notes.count > 0 %}
-                                            <span class="note-count">{{ subsubsection.notes.count }} note(s)</span>
-                                        {% endif %}
-                                        <br>
-                                        <small>{{ subsubsection.subsubsection_introduction }}</small>
+                                        {% if subsubsection.codes.count > 0 %}<span class="code-count">{{ subsubsection.codes.count }} code(s)</span>{% endif %}
+                                        {% if subsubsection.notes.count > 0 %}<span class="note-count">{{ subsubsection.notes.count }} note(s)</span>{% endif %}
+                                        <br><small>{{ subsubsection.subsubsection_introduction }}</small>
 
-                                        <!-- SubSubsection Notes -->
                                         {% if subsubsection.notes.exists %}
-                                        <ul class="note-list" id="note-list-subsubsection-{{ subsubsection.id }}" data-parent-type="subsubsection" data-parent-id="{{ subsubsection.id }}">
+                                        <ul class="note-list" id="note-list-subsubsection-{{ subsubsection.id }}">
                                         {% for note in subsubsection.notes.all %}
                                             <li class="draggable-note" data-note-id="{{ note.id }}">
                                                 {% if note.title %}<div class="note-title">📝 {{ note.title }}</div>{% endif %}
-                                                <div class="note-body" data-content='{{ note.content|default:"{}" | escapejs }}'></div>
+                                                <div class="note-body">{{ note.content|json_script:note.id }}</div>
                                                 <div class="note-actions">
                                                     <a href="{% url 'literature:edit_note' note.id %}">✏️ Edit Note</a>
-                                                    <a href="{% url 'literature:delete_note' note.id %}" class="del"
-                                                       onclick="return confirm('Delete this note?')">🗑️ Delete</a>
+                                                    <a href="{% url 'literature:delete_note' note.id %}" class="del" onclick="return confirm('Delete this note?')">🗑️ Delete</a>
                                                 </div>
                                             </li>
                                         {% endfor %}
@@ -321,9 +208,7 @@
                                             <a href="{% url 'literature:delete_subsubsection' subsubsection.id %}" onclick="return confirm('Delete this subsubsection?')">🗑️ Delete</a>
                                             <a href="{% url 'literature:add_code' %}?subsubsection={{ subsubsection.id }}">💻 Add Code</a>
                                             <a href="{% url 'literature:add_note' %}?subsubsection={{ subsubsection.id }}" style="color:#6644cc;">📝 Add Note</a>
-                                            {% if subsubsection.codes.count > 0 %}
-                                                <a href="{% url 'literature:view_codes' %}?subsubsection={{ subsubsection.id }}" class="view-codes-link">👁️ View Codes</a>
-                                            {% endif %}
+                                            {% if subsubsection.codes.count > 0 %}<a href="{% url 'literature:view_codes' %}?subsubsection={{ subsubsection.id }}" class="view-codes-link">👁️ View Codes</a>{% endif %}
                                         </div>
                                     </li>
                                 {% endfor %}
@@ -342,7 +227,6 @@
     </ul>
 
     <script>
-    // ── CSRF helper ───────────────────────────────────────────────────────────
     function getCookie(name) {
         let v = null;
         document.cookie.split(';').forEach(c => {
@@ -353,200 +237,176 @@
     }
     const csrftoken = getCookie('csrftoken');
 
-    // ── Render TipTap JSON nodes → HTML ───────────────────────────────────────
-    function renderTipTapNode(node) {
+    // ── TipTap JSON → HTML ────────────────────────────────────────────────────
+    function escapeHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function applyMarks(text, marks) {
+        if (!marks || !marks.length) return escapeHtml(text);
+        let r = escapeHtml(text);
+        marks.forEach(m => {
+            if (m.type === 'bold')   r = `<strong>${r}</strong>`;
+            if (m.type === 'italic') r = `<em>${r}</em>`;
+        });
+        return r;
+    }
+
+    function renderChildren(node) {
+        if (!node || !node.content) return '';
+        return node.content.map(renderNode).join('');
+    }
+
+    function renderNode(node) {
         if (!node) return '';
-
-        // Apply marks (bold, italic) to text content
-        function applyMarks(text, marks) {
-            if (!marks || marks.length === 0) return escapeHtml(text);
-            let result = escapeHtml(text);
-            marks.forEach(mark => {
-                if (mark.type === 'bold') result = `<strong>${result}</strong>`;
-                if (mark.type === 'italic') result = `<em>${result}</em>`;
-            });
-            return result;
-        }
-
-        function escapeHtml(str) {
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
-        }
-
-        function renderChildren(node) {
-            if (!node.content) return '';
-            return node.content.map(renderTipTapNode).join('');
-        }
-
         switch (node.type) {
-            case 'doc':
-                return renderChildren(node);
-
-            case 'paragraph':
-                return `<p>${renderChildren(node)}</p>`;
-
-            case 'text':
-                return applyMarks(node.text || '', node.marks);
-
-            case 'hardBreak':
-                return '<br>';
-
+            case 'doc':            return renderChildren(node);
+            case 'paragraph':      return `<p>${renderChildren(node)}</p>`;
+            case 'text':           return applyMarks(node.text || '', node.marks);
+            case 'hardBreak':      return '<br>';
+            case 'bulletList':     return `<ul>${renderChildren(node)}</ul>`;
+            case 'orderedList':    return `<ol>${renderChildren(node)}</ol>`;
+            case 'listItem':       return `<li>${renderChildren(node)}</li>`;
             case 'heading': {
-                const level = node.attrs && node.attrs.level ? node.attrs.level : 1;
-                return `<h${level}>${renderChildren(node)}</h${level}>`;
+                const l = (node.attrs && node.attrs.level) || 1;
+                return `<h${l}>${renderChildren(node)}</h${l}>`;
             }
-
-            case 'bulletList':
-                return `<ul>${renderChildren(node)}</ul>`;
-
-            case 'orderedList':
-                return `<ol>${renderChildren(node)}</ol>`;
-
-            case 'listItem':
-                return `<li>${renderChildren(node)}</li>`;
-
-            case 'image': {
-                const src = (node.attrs && node.attrs.src) ? escapeHtml(node.attrs.src) : '';
-                const alt = (node.attrs && node.attrs.alt) ? escapeHtml(node.attrs.alt) : '';
-                return `<img src="${src}" alt="${alt}">`;
+            case 'image':
+            case 'resizableImage': {
+                const a   = node.attrs || {};
+                const src = a.src    ? escapeHtml(a.src)         : '';
+                const alt = a.alt    ? escapeHtml(a.alt)         : '';
+                const w   = a.width  ? ` width="${a.width}"`     : '';
+                const h   = a.height ? ` height="${a.height}"`   : '';
+                return `<img src="${src}" alt="${alt}"${w}${h} style="max-width:100%;border-radius:4px;margin:6px 0;display:block;">`;
             }
-
             case 'latex': {
-                const latex = (node.attrs && node.attrs.latex) ? node.attrs.latex : '';
-                const display = node.attrs && node.attrs.display;
-                const container = document.createElement(display ? 'div' : 'span');
-                container.classList.add(display ? 'latex-block' : 'latex-inline');
-                try {
-                    katex.render(latex, container, {
-                        throwOnError: false,
-                        displayMode: !!display,
-                    });
-                } catch (e) {
-                    container.textContent = latex;
-                }
-                return container.outerHTML;
+                const latex   = (node.attrs && node.attrs.latex)   || '';
+                const display = (node.attrs && node.attrs.display) || false;
+                const wrap    = document.createElement(display ? 'div' : 'span');
+                wrap.className = display ? 'latex-block' : 'latex-inline';
+                try { katex.render(latex, wrap, { throwOnError: false, displayMode: !!display }); }
+                catch(e) { wrap.textContent = latex; }
+                return wrap.outerHTML;
             }
-
-            default:
-                // Fallback: just render children
-                return renderChildren(node);
+            default: return renderChildren(node);
         }
     }
 
-    // ── Render all note bodies on page load ───────────────────────────────────
-    document.querySelectorAll('.note-body').forEach(el => {
-        const raw = el.getAttribute('data-content');
-        if (!raw) return;
+    // ── Hydrate every .note-body ──────────────────────────────────────────────
+    // Strategy: json_script puts <script id="NOTE_ID" type="application/json">
+    // INSIDE the .note-body div. We find that script child, parse it, render,
+    // then replace the script tag with the rendered HTML.
+    document.querySelectorAll('.note-body').forEach(bodyEl => {
+        // Find the json_script tag that Django put inside this div
+        const scriptEl = bodyEl.querySelector('script[type="application/json"]');
+        if (!scriptEl) {
+            bodyEl.innerHTML = '<span class="note-error">(no content)</span>';
+            return;
+        }
+
+        let json;
         try {
-            const json = JSON.parse(raw);
-            if (json && json.type === 'doc') {
-                el.innerHTML = renderTipTapNode(json);
-            } else if (json && json.content) {
-                // Sometimes stored without top-level doc wrapper
-                el.innerHTML = json.content.map(renderTipTapNode).join('');
+            json = JSON.parse(scriptEl.textContent);
+        } catch(e) {
+            bodyEl.innerHTML = '<span class="note-error">(invalid content)</span>';
+            console.warn('Note JSON parse error:', e, scriptEl.textContent);
+            return;
+        }
+
+        // Handle double-serialized string (edge case from early saves)
+        if (typeof json === 'string') {
+            try { json = JSON.parse(json); } catch(e) { /* leave as-is */ }
+        }
+
+        if (!json || typeof json !== 'object') {
+            bodyEl.innerHTML = '<span class="note-error">(empty note)</span>';
+            return;
+        }
+
+        try {
+            let html = '';
+            if (json.type === 'doc') {
+                html = renderNode(json);
+            } else if (Array.isArray(json.content)) {
+                html = json.content.map(renderNode).join('');
+            } else {
+                html = '<span class="note-error">(unrecognised format)</span>';
             }
-        } catch (e) {
-            el.textContent = '';
+            bodyEl.innerHTML = html;
+        } catch(e) {
+            bodyEl.innerHTML = '<span class="note-error">(render error)</span>';
+            console.warn('Note render error:', e);
         }
     });
 
-    // ── Drag-and-drop: Notes ──────────────────────────────────────────────────
-    document.querySelectorAll('.note-list').forEach(function(noteList) {
-        new Sortable(noteList, {
-            animation: 150,
-            ghostClass: 'sortable-ghost',
-            handle: '.draggable-note',
-            onEnd: function() {
-                const noteIds = Array.from(noteList.children).map(li => li.getAttribute('data-note-id'));
+    // ── Drag-and-drop ─────────────────────────────────────────────────────────
+    document.querySelectorAll('.note-list').forEach(list => {
+        new Sortable(list, {
+            animation: 150, ghostClass: 'sortable-ghost', handle: '.draggable-note',
+            onEnd() {
+                const ids = Array.from(list.children).map(li => li.getAttribute('data-note-id'));
                 fetch("{% url 'literature:reorder_notes' %}", {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
-                    body: JSON.stringify({ note_ids: noteIds })
+                    method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrftoken},
+                    body: JSON.stringify({ note_ids: ids })
                 });
             }
         });
     });
-
-    // ── Drag-and-drop: Chapters ───────────────────────────────────────────────
-    document.querySelectorAll('.chapter-list').forEach(function(chapterList) {
-        new Sortable(chapterList, {
-            animation: 150,
-            ghostClass: 'sortable-ghost',
-            handle: '.draggable-chapter',
-            onEnd: function() {
-                const ids = Array.from(chapterList.children).map(li => li.getAttribute('data-chapter-id'));
+    document.querySelectorAll('.chapter-list').forEach(list => {
+        new Sortable(list, {
+            animation:150, ghostClass:'sortable-ghost', handle:'.draggable-chapter',
+            onEnd() {
+                const ids = Array.from(list.children).map(li=>li.getAttribute('data-chapter-id'));
                 fetch("{% url 'literature:reorder_chapters' %}", {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                    method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrftoken},
                     body: JSON.stringify({ chapter_ids: ids })
                 });
             }
         });
     });
-
-    // ── Drag-and-drop: Sections ───────────────────────────────────────────────
-    document.querySelectorAll('.section-list').forEach(function(sectionList) {
-        new Sortable(sectionList, {
-            animation: 150,
-            ghostClass: 'sortable-ghost',
-            handle: '.draggable-section',
-            onEnd: function() {
-                const ids = Array.from(sectionList.children).map(li => li.getAttribute('data-section-id'));
+    document.querySelectorAll('.section-list').forEach(list => {
+        new Sortable(list, {
+            animation:150, ghostClass:'sortable-ghost', handle:'.draggable-section',
+            onEnd() {
+                const ids = Array.from(list.children).map(li=>li.getAttribute('data-section-id'));
                 fetch("{% url 'literature:reorder_sections' %}", {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                    method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrftoken},
                     body: JSON.stringify({ section_ids: ids })
                 });
             }
         });
     });
-
-    // ── Drag-and-drop: Subsections ────────────────────────────────────────────
-    document.querySelectorAll('.subsection-list').forEach(function(subsectionList) {
-        new Sortable(subsectionList, {
-            animation: 150,
-            ghostClass: 'sortable-ghost',
-            handle: '.draggable-subsection',
-            onEnd: function() {
-                const ids = Array.from(subsectionList.children).map(li => li.getAttribute('data-subsection-id'));
+    document.querySelectorAll('.subsection-list').forEach(list => {
+        new Sortable(list, {
+            animation:150, ghostClass:'sortable-ghost', handle:'.draggable-subsection',
+            onEnd() {
+                const ids = Array.from(list.children).map(li=>li.getAttribute('data-subsection-id'));
                 fetch("{% url 'literature:reorder_subsections' %}", {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                    method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrftoken},
                     body: JSON.stringify({ subsection_ids: ids })
                 });
             }
         });
     });
-
-    // ── Drag-and-drop: SubSubsections ─────────────────────────────────────────
-    document.querySelectorAll('.subsubsection-list').forEach(function(subsubsectionList) {
-        new Sortable(subsubsectionList, {
-            animation: 150,
-            ghostClass: 'sortable-ghost',
-            handle: '.draggable-subsubsection',
-            onEnd: function() {
-                const ids = Array.from(subsubsectionList.children).map(li => li.getAttribute('data-subsubsection-id'));
+    document.querySelectorAll('.subsubsection-list').forEach(list => {
+        new Sortable(list, {
+            animation:150, ghostClass:'sortable-ghost', handle:'.draggable-subsubsection',
+            onEnd() {
+                const ids = Array.from(list.children).map(li=>li.getAttribute('data-subsubsection-id'));
                 fetch("{% url 'literature:reorder_subsubsections' %}", {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                    method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrftoken},
                     body: JSON.stringify({ subsubsection_ids: ids })
                 });
             }
         });
     });
-
-    // ── Drag-and-drop: Books ──────────────────────────────────────────────────
     new Sortable(document.getElementById('book-list'), {
-        animation: 150,
-        ghostClass: 'sortable-ghost',
-        handle: '.draggable-book',
-        onEnd: function() {
-            const ids = Array.from(document.getElementById('book-list').children).map(li => li.getAttribute('data-book-id'));
+        animation:150, ghostClass:'sortable-ghost', handle:'.draggable-book',
+        onEnd() {
+            const ids = Array.from(document.getElementById('book-list').children).map(li=>li.getAttribute('data-book-id'));
             fetch("{% url 'literature:reorder_books' %}", {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrftoken},
                 body: JSON.stringify({ book_ids: ids })
             });
         }
