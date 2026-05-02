@@ -1,5 +1,6 @@
 from django import forms
-from .models import Book, Chapter, Section, Subsection, SubSubsection, Code
+from .models import Book, Chapter, Section, Subsection, SubSubsection, Code, Note
+
 
 class BookForm(forms.ModelForm):
     class Meta:
@@ -38,4 +39,21 @@ class CodeForm(forms.ModelForm):
         widgets = {
             'code_content': forms.Textarea(attrs={'rows': 20, 'style': 'font-family: monospace;'}),
             'description': forms.Textarea(attrs={'rows': 3}),
+        }
+
+
+class NoteForm(forms.ModelForm):
+    """
+    Only handles title and order — content is managed entirely
+    by TipTap on the frontend and submitted as JSON.
+    """
+    class Meta:
+        model = Note
+        fields = ['title', 'order']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'placeholder': 'Note title (optional)',
+                'style': 'width: 100%; font-size: 1.1em; padding: 6px;'
+            }),
+            'order': forms.NumberInput(attrs={'style': 'width: 80px;'}),
         }

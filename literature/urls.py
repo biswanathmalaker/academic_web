@@ -1,8 +1,6 @@
 from django.urls import path
 from . import views
 
-
-
 app_name = 'literature'
 urlpatterns = [
     path('', views.index, name='index'),
@@ -38,11 +36,17 @@ urlpatterns = [
     path('delete-code/<int:pk>/', views.delete_code, name='delete_code'),
     path('view-codes/', views.view_codes, name='view_codes'),
 
+    # Notes
+    path('add-note/', views.add_note, name='add_note'),
+    path('edit-note/<int:pk>/', views.edit_note, name='edit_note'),
+    path('delete-note/<int:pk>/', views.delete_note, name='delete_note'),
+    path('upload-note-image/', views.upload_note_image, name='upload_note_image'),
+    path('reorder-notes/', views.reorder_notes, name='reorder_notes'),
+
     # Reordering
     path('reorder-chapters/', views.reorder_chapters, name='reorder_chapters'),
     path('reorder-sections/', views.reorder_sections, name='reorder_sections'),
     path('reorder-subsections/', views.reorder_subsections, name='reorder_subsections'),
     path('reorder-subsubsections/', views.reorder_subsubsections, name='reorder_subsubsections'),
     path('reorder-books/', views.reorder_books, name='reorder_books'),
-
 ]

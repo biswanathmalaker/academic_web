@@ -1,13 +1,19 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 import json
-from .models import Book, Chapter, Section, Subsection, SubSubsection, Code
-from .forms import BookForm, ChapterForm, SectionForm, SubsectionForm, SubSubsectionForm, CodeForm
+from .models import Book, Chapter, Section, Subsection, SubSubsection, Code, Note, NoteImage
+from .forms import BookForm, ChapterForm, SectionForm, SubsectionForm, SubSubsectionForm, CodeForm, NoteForm
 
 
 def index(request):
-    books = Book.objects.all().order_by('order')
+    books = Book.objects.prefetch_related(
+        'chapters__notes',
+        'chapters__sections__notes',
+        'chapters__sections__subsections__notes',
+        'chapters__sections__subsections__subsubsections__notes',
+    ).all().order_by('order')
     return render(request, 'literature/index.html', {'books': books})
 
 
@@ -168,13 +174,10 @@ def add_code(request):
         form = CodeForm(request.POST)
         if form.is_valid():
             code = form.save(commit=False)
-            
-            # Determine which parent to attach to based on query parameters
             chapter_id = request.POST.get('chapter_id')
             section_id = request.POST.get('section_id')
             subsection_id = request.POST.get('subsection_id')
             subsubsection_id = request.POST.get('subsubsection_id')
-            
             if subsubsection_id:
                 code.subsubsection_id = subsubsection_id
             elif subsection_id:
@@ -183,18 +186,16 @@ def add_code(request):
                 code.section_id = section_id
             elif chapter_id:
                 code.chapter_id = chapter_id
-            
             code.save()
             return redirect('literature:index')
     else:
         form = CodeForm()
-        
-    # Get context for which parent we're adding code to
+
     chapter_id = request.GET.get('chapter')
     section_id = request.GET.get('section')
     subsection_id = request.GET.get('subsection')
     subsubsection_id = request.GET.get('subsubsection')
-    
+
     context = {
         'form': form,
         'title': 'Add Code',
@@ -203,7 +204,6 @@ def add_code(request):
         'subsection_id': subsection_id,
         'subsubsection_id': subsubsection_id,
     }
-    
     return render(request, 'literature/code_form.html', context)
 
 def update_code(request, pk):
@@ -222,15 +222,14 @@ def delete_code(request, pk):
     return redirect('literature:index')
 
 def view_codes(request):
-    """View all codes for a specific chapter, section, subsection, or subsubsection"""
     chapter_id = request.GET.get('chapter')
     section_id = request.GET.get('section')
     subsection_id = request.GET.get('subsection')
     subsubsection_id = request.GET.get('subsubsection')
-    
+
     codes = None
     parent_name = ""
-    
+
     if subsubsection_id:
         parent = get_object_or_404(SubSubsection, pk=subsubsection_id)
         codes = parent.codes.all()
@@ -247,23 +246,142 @@ def view_codes(request):
         parent = get_object_or_404(Chapter, pk=chapter_id)
         codes = parent.codes.all()
         parent_name = f"Chapter: {parent.chapter_name}"
-    
+
     return render(request, 'literature/view_codes.html', {
         'codes': codes,
         'parent_name': parent_name
     })
 
 
-# ----- Reordering -----
+# ----- Notes -----
+
+def add_note(request):
+    """Add a new note to a chapter/section/subsection/subsubsection."""
+    if request.method == "POST":
+        form = NoteForm(request.POST)
+        if form.is_valid():
+            note = form.save(commit=False)
+            # Attach to the right parent (from hidden POST fields)
+            chapter_id = request.POST.get('chapter_id')
+            section_id = request.POST.get('section_id')
+            subsection_id = request.POST.get('subsection_id')
+            subsubsection_id = request.POST.get('subsubsection_id')
+
+            if subsubsection_id:
+                note.subsubsection_id = subsubsection_id
+            elif subsection_id:
+                note.subsection_id = subsection_id
+            elif section_id:
+                note.section_id = section_id
+            elif chapter_id:
+                note.chapter_id = chapter_id
+
+            # Save TipTap JSON content from hidden field
+            content_json = request.POST.get('content_json', '{}')
+            try:
+                note.content = json.loads(content_json)
+            except (json.JSONDecodeError, TypeError):
+                note.content = {}
+
+            note.save()
+            return redirect('literature:index')
+    else:
+        form = NoteForm()
+
+    # Which parent are we adding to?
+    chapter_id = request.GET.get('chapter')
+    section_id = request.GET.get('section')
+    subsection_id = request.GET.get('subsection')
+    subsubsection_id = request.GET.get('subsubsection')
+
+    context = {
+        'form': form,
+        'title': 'Add Note',
+        'note': None,  # new note, no existing content
+        'chapter_id': chapter_id,
+        'section_id': section_id,
+        'subsection_id': subsection_id,
+        'subsubsection_id': subsubsection_id,
+        'content_json': '{}',
+    }
+    return render(request, 'literature/note_edit.html', context)
+
+
+def edit_note(request, pk):
+    """Edit an existing note."""
+    note = get_object_or_404(Note, pk=pk)
+    if request.method == "POST":
+        form = NoteForm(request.POST, instance=note)
+        if form.is_valid():
+            note = form.save(commit=False)
+            content_json = request.POST.get('content_json', '{}')
+            try:
+                note.content = json.loads(content_json)
+            except (json.JSONDecodeError, TypeError):
+                note.content = {}
+            note.save()
+            return redirect('literature:index')
+    else:
+        form = NoteForm(instance=note)
+
+    import json as _json
+    context = {
+        'form': form,
+        'title': f'Edit Note: {note.title or "Untitled"}',
+        'note': note,
+        'chapter_id': note.chapter_id,
+        'section_id': note.section_id,
+        'subsection_id': note.subsection_id,
+        'subsubsection_id': note.subsubsection_id,
+        'content_json': _json.dumps(note.content) if note.content else '{}',
+    }
+    return render(request, 'literature/note_edit.html', context)
+
+
+def delete_note(request, pk):
+    note = get_object_or_404(Note, pk=pk)
+    note.delete()
+    return redirect('literature:index')
+
+
+@require_POST
+def upload_note_image(request):
+    """
+    AJAX endpoint: receives an image file, saves it, returns the URL.
+    TipTap calls this when the user inserts an image.
+    """
+    if 'image' not in request.FILES:
+        return JsonResponse({'error': 'No image provided'}, status=400)
+
+    image_file = request.FILES['image']
+    note_image = NoteImage(image=image_file)
+    note_image.save()
+
+    return JsonResponse({'url': request.build_absolute_uri(note_image.image.url)})
+
+
+@require_POST
+def reorder_notes(request):
+    """AJAX endpoint to save new note order via drag-and-drop."""
+    try:
+        data = json.loads(request.body)
+        note_ids = data.get('note_ids', [])
+        for index, note_id in enumerate(note_ids):
+            Note.objects.filter(id=note_id).update(order=index)
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+
+# ----- Reordering (existing, unchanged) -----
+
 @require_POST
 def reorder_chapters(request):
     try:
         data = json.loads(request.body)
         chapter_ids = data.get('chapter_ids', [])
-        
         for index, chapter_id in enumerate(chapter_ids):
             Chapter.objects.filter(id=chapter_id).update(order=index)
-        
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
@@ -274,10 +392,8 @@ def reorder_sections(request):
     try:
         data = json.loads(request.body)
         section_ids = data.get('section_ids', [])
-        
         for index, section_id in enumerate(section_ids):
             Section.objects.filter(id=section_id).update(order=index)
-        
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
@@ -288,10 +404,8 @@ def reorder_subsections(request):
     try:
         data = json.loads(request.body)
         subsection_ids = data.get('subsection_ids', [])
-        
         for index, subsection_id in enumerate(subsection_ids):
             Subsection.objects.filter(id=subsection_id).update(order=index)
-        
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
@@ -302,27 +416,20 @@ def reorder_subsubsections(request):
     try:
         data = json.loads(request.body)
         subsubsection_ids = data.get('subsubsection_ids', [])
-        
         for index, subsubsection_id in enumerate(subsubsection_ids):
             SubSubsection.objects.filter(id=subsubsection_id).update(order=index)
-        
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-    
 
-import json
-from django.http import JsonResponse
-from .models import Book
 
+@require_POST
 def reorder_books(request):
-    if request.method == 'POST':
+    try:
         data = json.loads(request.body)
         book_ids = data.get('book_ids', [])
-
         for index, book_id in enumerate(book_ids):
             Book.objects.filter(id=book_id).update(order=index)
-
         return JsonResponse({'status': 'success'})
-
-    return JsonResponse({'status': 'error'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)

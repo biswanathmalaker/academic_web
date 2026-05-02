@@ -97,3 +97,51 @@ class Code(models.Model):
         elif self.chapter:
             return self.chapter
         return None
+    
+    
+    
+# ADD these two classes to the bottom of your existing models.py
+# Also add this import at the top if not already present:
+# from django.db import models
+
+class Note(models.Model):
+    # Attachable to any level (same pattern as Code)
+    chapter = models.ForeignKey(Chapter, related_name='notes', on_delete=models.CASCADE, null=True, blank=True)
+    section = models.ForeignKey(Section, related_name='notes', on_delete=models.CASCADE, null=True, blank=True)
+    subsection = models.ForeignKey(Subsection, related_name='notes', on_delete=models.CASCADE, null=True, blank=True)
+    subsubsection = models.ForeignKey(SubSubsection, related_name='notes', on_delete=models.CASCADE, null=True, blank=True)
+
+    title = models.CharField(max_length=255, blank=True)
+    # Stores TipTap JSON (rich text + images + LaTeX nodes)
+    content = models.JSONField(default=dict, blank=True)
+    order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        parent = self.subsubsection or self.subsection or self.section or self.chapter
+        return f"{parent} - Note: {self.title or 'Untitled'}"
+
+    def get_parent(self):
+        if self.subsubsection:
+            return self.subsubsection
+        elif self.subsection:
+            return self.subsection
+        elif self.section:
+            return self.section
+        elif self.chapter:
+            return self.chapter
+        return None
+
+
+class NoteImage(models.Model):
+    """Stores images uploaded inside notes."""
+    note = models.ForeignKey(Note, related_name='images', on_delete=models.CASCADE, null=True, blank=True)
+    image = models.ImageField(upload_to='note_images/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Image for {self.note}"
