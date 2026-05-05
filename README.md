@@ -72,9 +72,8 @@ urlpatterns = [
 ]
 
 urlpatterns += static('/papers/pdf/', document_root=settings.BASE_DIR / 'papers/pdf')
-
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) 
+
 ```
 
 ### Installed Apps (`academic_web/settings.py`)
@@ -117,7 +116,15 @@ Q_CLUSTER = {
     'orm': 'default', # Use your existing DB for the queue
 }
 
-MEDIA_URL = 'media/'
+
+
+STATIC_URL = 'static/'
+
+# Media files (user uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+
 
 
 ```
