@@ -16,3 +16,11 @@ db.sqlite3
 papers1/
 literature1/
 media/
+
+*.ipynb
+he2.py
+he_atom_vmc.png
+nasa_ads.html
+street_crossing.py
+test.py
+test.txt
