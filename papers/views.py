@@ -40,6 +40,58 @@ from django.conf import settings
 from django.shortcuts import render
 from .models import Paper
 
+
+
+# ── Paste these two views into your existing papers/views.py ────────────────
+# Add this import at the top of views.py alongside your existing imports:
+#   from .utils import save_bibtex, fetch_and_update_from_ads
+
+import json
+from django.views.decorators.http import require_POST
+from django.shortcuts import get_object_or_404, redirect
+from django.http import JsonResponse
+from .models import Paper
+from .utils import save_bibtex, fetch_and_update_from_ads
+
+@require_POST
+def update_paper_ads(request, paper_id):
+    """
+    Triggered by the 'Update Details' button on a paper card.
+    Fetches extended metadata from ADS, creates/links satellite papers,
+    updates citation counts, abstract, last_ads_updated.
+    Redirects back to index with a session message on completion.
+    """
+    paper = get_object_or_404(Paper, pk=paper_id)
+    summary = fetch_and_update_from_ads(paper)
+
+    if "error" in summary:
+        request.session["ads_update_message"] = f"❌ {summary['error']}"
+    else:
+        request.session["ads_update_message"] = (
+            f"✅ Updated '{paper.title[:60]}': "
+            f"{summary['references_total']} refs, "
+            f"{summary['citations_total']} citations, "
+            f"{summary['satellite_new']} new satellite papers added."
+        )
+
+    return redirect("papers:index")
+
+
+@require_POST
+def make_core(request, paper_id):
+    """
+    Promote a satellite (core=False) paper to a core (core=True) paper.
+    Called from the offcanvas sidebar 'Make Core' button.
+    Returns JSON so the button can update in place without a full reload.
+    """
+    paper = get_object_or_404(Paper, pk=paper_id)
+    paper.core = True
+    paper.save(update_fields=["core"])
+    return JsonResponse({"status": "ok", "paper_id": paper_id, "key": paper.key})
+
+
+
+
 def get_filtered_papers(request):
     filter_option = request.GET.get("filter")
     if filter_option:

@@ -30,4 +30,6 @@ urlpatterns = [
         name="statements_by_topic_print"
     ),
     path('papers/<int:paper_id>/update_categories/', views.update_categories, name='update_categories'),
+    path("paper/<int:paper_id>/update-ads/", views.update_paper_ads, name="update_paper_ads"),
+    path("paper/<int:paper_id>/make-core/",  views.make_core,         name="make_core"),
 ]

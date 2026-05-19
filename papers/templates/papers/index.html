@@ -9,7 +9,7 @@
 
     <style>
         :root {
-            --bg-main: #020617; 
+            --bg-main: #020617;
             --glass-bg: rgba(255, 255, 255, 0.04);
             --glass-border: rgba(255, 255, 255, 0.1);
             --glass-header: rgba(255, 255, 255, 0.06);
@@ -30,19 +30,13 @@
         }
 
         #canvas-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            pointer-events: none;
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1; pointer-events: none;
         }
 
         .sticky-filter-header {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            position: sticky; top: 0; z-index: 1000;
             background: rgba(15, 23, 42, 0.6);
             backdrop-filter: blur(0.1px);
             -webkit-backdrop-filter: blur(0.1px);
@@ -59,16 +53,22 @@
             border-radius: 20px;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             margin-bottom: 2.5rem;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3);
             animation: fadeIn 0.5s ease forwards;
             opacity: 0;
         }
 
+        /* Satellite papers get a subtle dimmed style */
+        .paper-card.satellite {
+            border-color: rgba(148, 163, 184, 0.2) !important;
+            opacity: 0.75;
+        }
+
         .paper-card:hover {
-            border-color: rgba(56, 189, 248, 0.5) !important;
+            border-color: rgba(56,189,248,0.5) !important;
             transform: translateY(-8px) scale(1.01);
-            background: rgba(255, 255, 255, 0.0001) !important;
-            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
+            background: rgba(255,255,255,0.0001) !important;
+            box-shadow: 0 12px 40px 0 rgba(0,0,0,0.4);
         }
 
         .card-header {
@@ -80,67 +80,61 @@
         }
 
         .category-sidebar-list {
-            max-height: 150px; 
+            max-height: 150px;
             overflow-y: auto;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0,0,0,0.2);
             border: 1px solid var(--glass-border);
             border-radius: 12px;
             padding: 10px;
         }
-
         .category-sidebar-list::-webkit-scrollbar { width: 4px; }
         .category-sidebar-list::-webkit-scrollbar-thumb { background: var(--accent-secondary); border-radius: 10px; }
 
         .glass-panel {
-            background: rgba(255, 255, 255, 0.03) !important;
+            background: rgba(255,255,255,0.03) !important;
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 12px;
         }
 
         .glass-input {
-            background-color: rgba(255, 255, 255, 0.05) !important;
+            background-color: rgba(255,255,255,0.05) !important;
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
             color: #ffffff !important;
             cursor: pointer;
             transition: all 0.3s ease;
         }
-
         .glass-input:focus {
-            background-color: rgba(255, 255, 255, 0.1) !important;
+            background-color: rgba(255,255,255,0.1) !important;
             border-color: var(--accent-primary) !important;
-            box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.25);
+            box-shadow: 0 0 0 0.25rem rgba(56,189,248,0.25);
         }
-
-        .glass-input option {
-            background-color: #0f172a;
-            color: white;
-        }
+        .glass-input option { background-color: #0f172a; color: white; }
 
         .form-select, .form-control {
-            background: rgba(255, 255, 255, 0.05) !important;
+            background: rgba(255,255,255,0.05) !important;
             border: 1px solid var(--glass-border) !important;
             color: var(--text-high) !important;
             backdrop-filter: blur(5px);
         }
 
         .badge-category {
-            background: rgba(129, 140, 248, 0.15);
+            background: rgba(129,140,248,0.15);
             color: var(--accent-secondary);
-            border: 1px solid rgba(129, 140, 248, 0.3);
+            border: 1px solid rgba(129,140,248,0.3);
             backdrop-filter: blur(4px);
         }
 
         .bg-glass-dark {
-            background: rgba(0, 0, 0, 0.3) !important;
+            background: rgba(0,0,0,0.3) !important;
             border: 1px solid var(--glass-border) !important;
         }
 
         .bibtex-pre {
-            background: rgba(0, 0, 0, 0.4) !important;
+            background: rgba(0,0,0,0.4) !important;
             backdrop-filter: blur(10px);
             padding: 15px;
             border-radius: 12px;
@@ -151,274 +145,562 @@
             overflow: auto;
         }
 
-        .border-glass-separator {
-            border-color: var(--glass-border) !important;
+        .border-glass-separator { border-color: var(--glass-border) !important; }
+
+        .modal-backdrop { z-index: 1050 !important; }
+        .modal          { z-index: 1055 !important; }
+
+        /* ── Offcanvas sidebar ─────────────────────────────── */
+        .offcanvas {
+            background: rgba(10, 18, 35, 0.97) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-left: 1px solid var(--glass-border) !important;
+            width: 420px !important;
         }
 
-        /* Fix: ensure modals always sit above everything */
-        .modal-backdrop {
-            z-index: 1050 !important;
+        .offcanvas-header { border-bottom: 1px solid var(--glass-border); }
+
+        .sat-paper-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            transition: border-color 0.2s;
         }
-        .modal {
-            z-index: 1055 !important;
+        .sat-paper-item:hover { border-color: rgba(56,189,248,0.4); }
+        .sat-paper-item.is-core { border-color: rgba(56,189,248,0.35); }
+
+        .sat-paper-item .sat-title  { font-size: 0.82rem; color: #e2e8f0; line-height: 1.35; }
+        .sat-paper-item .sat-meta   { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; }
+        .sat-paper-item .sat-bibcode { font-size: 0.7rem; font-family: monospace; color: var(--accent-primary); }
+
+        .offcanvas-tabs .nav-link {
+            color: var(--text-muted);
+            border: 1px solid transparent;
+            border-radius: 8px;
+            font-size: 0.85rem;
         }
+        .offcanvas-tabs .nav-link.active {
+            background: rgba(56,189,248,0.12);
+            border-color: rgba(56,189,248,0.3);
+            color: var(--accent-primary);
+        }
+
+        /* ── Citation count badges ─────────────────────────── */
+        .citation-stats {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .stat-chip {
+            font-size: 0.72rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .stat-chip.ads   { background: rgba(56,189,248,0.12);  color: #38bdf8; border: 1px solid rgba(56,189,248,0.25); }
+        .stat-chip.local { background: rgba(129,140,248,0.12); color: #818cf8; border: 1px solid rgba(129,140,248,0.25); }
+        .stat-chip.refs  { background: rgba(52,211,153,0.10);  color: #34d399; border: 1px solid rgba(52,211,153,0.25); }
+        .stat-chip.cites { background: rgba(251,146,60,0.10);  color: #fb923c; border: 1px solid rgba(251,146,60,0.25); }
+
+        .last-updated { font-size: 0.68rem; color: var(--text-muted); }
+
+        /* Spinning icon while ADS update is in progress */
+        .spin { animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            to   { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
-    <div id="canvas-container"></div>
+<div id="canvas-container"></div>
 
-    <header class="sticky-filter-header">
-        <div class="container">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <h3 class="mb-0 fw-bold text-white"><i class="bi bi-journal-bookmark-fill me-2 text-info"></i>Papers</h3>
-                <ul class="nav nav-pills gap-2">
-                    <li class="nav-item"><a class="nav-link text-light" href="/admin">Admin</a></li>
-                    <li class="nav-item"><a class="nav-link text-light" href="{% url 'literature:index' %}">Literature</a></li>
-                    <li class="nav-item"><a class="nav-link text-light" href="{% url 'papers:all_papers_detail' %}">Detail View</a></li>
-                    <li class="nav-item"><a class="nav-link text-light" href="{% url 'papers:statement_list' %}">all Statements</a></li>
-                    <li class="nav-item"><button class="btn btn-primary btn-sm px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addPaperModal">➕ Add Paper</button></li>
-                </ul>
-            </div>
+<!-- ── Flash message from ADS update ───────────────────────────────────────── -->
+{% if request.session.ads_update_message %}
+<div class="container mt-3">
+    <div class="alert alert-info alert-dismissible fade show glass-panel" role="alert" style="color: #e2e8f0;">
+        {{ request.session.ads_update_message }}
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+    </div>
+</div>
+{% endif %}
 
-            <div class="row mt-4 g-3">
-                <div class="col-md-4">
-                    <div class="glass-panel p-3 shadow-sm">
-                        <form method="GET" id="filterForm">
-                            <input type="hidden" name="form_name" value="type_filter">
-                            <label class="small text-white mb-2 fw-bold" style="opacity: 0.8;">
-                                <i class="bi bi-filter-left me-1"></i> Status Filter
-                            </label>
-                            <select name="filter" class="form-select form-select-sm glass-input" onchange="this.form.submit()">
-                                <option value="all_papers" {% if filter_option == 'all_papers' %}selected{% endif %}>All Papers</option>
-                                <option value="only_pdf_available" {% if filter_option == 'only_pdf_available' %}selected{% endif %}>PDF Available</option>
-                                <option value="only_non_pdf" {% if filter_option == 'only_non_pdf' %}selected{% endif %}>Missing PDF</option>
-                                <option value="papers_cited_by_statements" {% if filter_option == 'papers_cited_by_statements' %}selected{% endif %}>Cited by Statements</option>
-                            </select>
-                        </form>
-                    </div>
-                </div>
-                <div class="col-md-8">
-                    <form method="GET" id="categoryFilterForm">
-                        <input type="hidden" name="form_name" value="category_filter">
-                        <label class="small text-white mb-1">Category Multi-Filter</label>
-                        <div class="d-flex gap-2">
-                            <div class="category-sidebar-list flex-grow-1" style="max-height: 38px; display: flex; align-items: center; white-space: nowrap; overflow-x: auto; overflow-y: hidden;">
-                                {% for cat in categories %}
-                                <div class="form-check form-check-inline m-0 me-3">
-                                    <input class="form-check-input" type="checkbox" name="category" value="{{ cat.id }}" id="top_cat{{ cat.id }}" {% if cat.id|stringformat:"s" in category_filter %}checked{% endif %}>
-                                    <label class="form-check-label text-white" style="font-size: 0.8rem;" for="top_cat{{ cat.id }}">{{ cat.name }}</label>
-                                </div>
-                                {% endfor %}
-                            </div>
-                            <button type="submit" class="btn btn-secondary btn-sm">Apply</button>
-                        </div>
+<header class="sticky-filter-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <h3 class="mb-0 fw-bold text-white"><i class="bi bi-journal-bookmark-fill me-2 text-info"></i>Papers</h3>
+            <ul class="nav nav-pills gap-2">
+                <li class="nav-item"><a class="nav-link text-light" href="/admin">Admin</a></li>
+                <li class="nav-item"><a class="nav-link text-light" href="{% url 'literature:index' %}">Literature</a></li>
+                <li class="nav-item"><a class="nav-link text-light" href="{% url 'papers:all_papers_detail' %}">Detail View</a></li>
+                <li class="nav-item"><a class="nav-link text-light" href="{% url 'papers:statement_list' %}">all Statements</a></li>
+                <li class="nav-item"><button class="btn btn-primary btn-sm px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addPaperModal">➕ Add Paper</button></li>
+            </ul>
+        </div>
+
+        <div class="row mt-4 g-3">
+            <div class="col-md-4">
+                <div class="glass-panel p-3 shadow-sm">
+                    <form method="GET" id="filterForm">
+                        <input type="hidden" name="form_name" value="type_filter">
+                        <label class="small text-white mb-2 fw-bold" style="opacity:0.8;">
+                            <i class="bi bi-filter-left me-1"></i> Status Filter
+                        </label>
+                        <select name="filter" class="form-select form-select-sm glass-input" onchange="this.form.submit()">
+                            <option value="all_papers"                {% if filter_option == 'all_papers' %}selected{% endif %}>All Papers</option>
+                            <option value="core_only"                 {% if filter_option == 'core_only' %}selected{% endif %}>Core Papers Only</option>
+                            <option value="satellite_only"            {% if filter_option == 'satellite_only' %}selected{% endif %}>Satellite Papers Only</option>
+                            <option value="only_pdf_available"        {% if filter_option == 'only_pdf_available' %}selected{% endif %}>PDF Available</option>
+                            <option value="only_non_pdf"              {% if filter_option == 'only_non_pdf' %}selected{% endif %}>Missing PDF</option>
+                            <option value="papers_cited_by_statements"{% if filter_option == 'papers_cited_by_statements' %}selected{% endif %}>Cited by Statements</option>
+                        </select>
                     </form>
                 </div>
             </div>
+            <div class="col-md-8">
+                <form method="GET" id="categoryFilterForm">
+                    <input type="hidden" name="form_name" value="category_filter">
+                    <label class="small text-white mb-1">Category Multi-Filter</label>
+                    <div class="d-flex gap-2">
+                        <div class="category-sidebar-list flex-grow-1" style="max-height:38px; display:flex; align-items:center; white-space:nowrap; overflow-x:auto; overflow-y:hidden;">
+                            {% for cat in categories %}
+                            <div class="form-check form-check-inline m-0 me-3">
+                                <input class="form-check-input" type="checkbox" name="category" value="{{ cat.id }}" id="top_cat{{ cat.id }}" {% if cat.id|stringformat:"s" in category_filter %}checked{% endif %}>
+                                <label class="form-check-label text-white" style="font-size:0.8rem;" for="top_cat{{ cat.id }}">{{ cat.name }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button type="submit" class="btn btn-secondary btn-sm">Apply</button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </header>
+    </div>
+</header>
 
-    <main class="container pb-5">
-        {% for paper in papers %}
-            <div class="card paper-card" style="animation-delay: 0.{{ forloop.counter }}s">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <div class="btn-group">
-                        {% if paper.adsurl %}<a class="btn btn-sm btn-outline-light" href="{{ paper.adsurl }}">ADS</a>{% endif %}
-                        {% if paper.doi %}<a class="btn btn-sm btn-outline-light" href="https://doi.org/{{ paper.doi }}">DOI</a>{% endif %}
-                        {% if paper.arxiv %}<a class="btn btn-sm btn-outline-light" href="{{ paper.arxiv }}">arXiv</a>{% endif %}
-                        <button class="btn btn-sm btn-outline-light" onclick="copyBibtex('{{ paper.key }}', `{{ paper.bibtex|escapejs }}`)"><i class="bi bi-clipboard"></i> BibTeX</button>
-                    </div>
-                    <div class="d-flex align-items-center gap-3">
-                        <a href="{% url 'papers:manage_notes' paper.id %}" class="btn btn-sm btn-link text-info text-decoration-none small"><i class="bi bi-pencil-square"></i> Notes</a>
-                        <a href="{% url 'papers:read_notes' paper.id %}" class="btn btn-sm btn-link text-info text-decoration-none small"><i class="bi bi-eye"></i> Read</a>
-                        <span class="badge bg-primary px-3 py-2 shadow-sm">{{ paper.year }}</span>
-                    </div>
-                </div>
-                
-                <div class="card-body p-4">
-                    <div class="row g-4">
-                        <div class="col-lg-9">
-                            <h5 class="card-title fw-bold mb-3 text-white">
-                                <span class="text-info me-2">{{ forloop.counter }}.</span>{{ paper.title }}
-                            </h5>
-                            
-                            <div class="mb-4 d-flex flex-wrap gap-2">
-                                <span class="badge bg-glass-dark text-info fw-normal">{{ paper.key }}</span>
-                                {% for cat in paper.categories.all %}
-                                <span class="badge badge-category">{{ cat.name }}</span>
-                                {% endfor %}
-                            </div>
+<main class="container pb-5">
+    {% for paper in papers %}
+    <div class="card paper-card {% if not paper.core %}satellite{% endif %}" style="animation-delay: 0.{{ forloop.counter }}s">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="btn-group flex-wrap">
+                {% if paper.adsurl %}<a class="btn btn-sm btn-outline-light" href="{{ paper.adsurl }}" target="_blank">ADS</a>{% endif %}
+                {% if paper.doi %}<a class="btn btn-sm btn-outline-light" href="https://doi.org/{{ paper.doi }}" target="_blank">DOI</a>{% endif %}
+                {% if paper.arxiv %}<a class="btn btn-sm btn-outline-light" href="{{ paper.arxiv }}" target="_blank">arXiv</a>{% endif %}
+                <button class="btn btn-sm btn-outline-light" onclick="copyBibtex('{{ paper.key }}', `{{ paper.bibtex|escapejs }}`)">
+                    <i class="bi bi-clipboard"></i> BibTeX
+                </button>
 
-                            <div class="d-flex gap-2 flex-wrap mb-3">
-                                <a class="btn btn-sm btn-outline-secondary px-4" href="/papers/pdf/{{ paper.key }}.pdf" target="_blank">
-                                    <i class="bi bi-file-earmark-pdf"></i> PDF
-                                </a>
-
-                                {% if paper.abstract %}
-                                    <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#abs{{ paper.id }}">
-                                        Abstract
-                                    </button>
-                                {% else %}
-                                    <!-- Button only — modal lives outside the card loop below -->
-                                    <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#addAbstractModal{{ paper.id }}">
-                                        ➕ Add Abstract
-                                    </button>
-                                {% endif %}
-
-                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#bib{{ paper.id }}">
-                                    Source
-                                </button>
-                            </div>
-
-                            {% if paper.abstract %}
-                            <div class="collapse mt-3" id="abs{{ paper.id }}">
-                                <div class="p-3 bg-glass-dark rounded small text-light border-start border-info border-4">
-                                    {{ paper.abstract }}
-                                </div>
-                            </div>
-                            {% endif %}
-
-                            <div class="collapse mt-3" id="bib{{ paper.id }}">
-                                <pre class="bibtex-pre">{{ paper.bibtex }}</pre>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-3 border-start border-glass-separator">
-                            <form method="post" action="{% url 'papers:update_categories' paper.id %}">
-                                {% csrf_token %}
-                                <p class="small text-uppercase mb-2 fw-bold text-muted" style="font-size: 0.7rem;">Quick Update</p>
-                                <div class="category-sidebar-list mb-2">
-                                    {% for cat in categories %}
-                                    <div class="form-check mb-1">
-                                        <input class="form-check-input" type="checkbox" name="categories" value="{{ cat.id }}" id="p{{ paper.id }}c{{ cat.id }}" {% if cat in paper.categories.all %}checked{% endif %}>
-                                        <label class="form-check-label text-white-50" style="font-size: 0.8rem;" for="p{{ paper.id }}c{{ cat.id }}">
-                                            {{ cat.name }}
-                                        </label>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                                <button type="submit" class="btn btn-sm btn-warning w-100 fw-bold shadow-sm">Update</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+                {# ── Update Details button (only meaningful if bibcode known) ── #}
+                {% if paper.bibcode %}
+                <form method="post" action="{% url 'papers:update_paper_ads' paper.id %}" style="display:inline;" class="ads-update-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-info ads-update-btn" title="Fetch latest metadata, references & citations from ADS">
+                        <i class="bi bi-arrow-clockwise"></i> Update Details
+                    </button>
+                </form>
+                {% endif %}
             </div>
-        {% endfor %}
 
-        <!-- =====================================================
-             ALL ABSTRACT MODALS — rendered outside card loop
-             so card's CSS transform doesn't trap the stacking context
-             ===================================================== -->
-        {% for paper in papers %}
-            {% if not paper.abstract %}
-            <div class="modal fade" id="addAbstractModal{{ paper.id }}" tabindex="-1" aria-labelledby="abstractModalLabel{{ paper.id }}" aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-centered">
-                    <div class="modal-content" style="background: rgba(15, 23, 42, 0.95) !important; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 20px;">
-                        <div class="modal-header border-glass-separator">
-                            <h5 class="modal-title text-white" id="abstractModalLabel{{ paper.id }}">
-                                Add Abstract
-                            </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p class="small text-muted mb-3">{{ paper.title }}</p>
-                            <form method="post" action="{% url 'papers:add_abstract' paper.id %}">
-                                {% csrf_token %}
-                                <textarea name="abstract" rows="8" class="form-control mb-3"
-                                    placeholder="Write or paste abstract here..."></textarea>
-                                <div class="d-flex justify-content-end gap-2">
-                                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                                    <button type="submit" class="btn btn-primary px-4">Save Abstract</button>
-                                </div>
-                            </form>
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                {# ── Core / Satellite badge ── #}
+                {% if paper.core %}
+                    <span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-25 px-2 py-1" style="font-size:0.68rem;">CORE</span>
+                {% else %}
+                    <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25 px-2 py-1" style="font-size:0.68rem;">SATELLITE</span>
+                {% endif %}
+
+                <a href="{% url 'papers:manage_notes' paper.id %}" class="btn btn-sm btn-link text-info text-decoration-none small"><i class="bi bi-pencil-square"></i> Notes</a>
+                <a href="{% url 'papers:read_notes' paper.id %}"   class="btn btn-sm btn-link text-info text-decoration-none small"><i class="bi bi-eye"></i> Read</a>
+                <span class="badge bg-primary px-3 py-2 shadow-sm">{{ paper.year }}</span>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="row g-4">
+                <div class="col-lg-9">
+                    <h5 class="card-title fw-bold mb-3 text-white">
+                        <span class="text-info me-2">{{ forloop.counter }}.</span>{{ paper.title }}
+                    </h5>
+
+                    <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+                        <span class="badge bg-glass-dark text-info fw-normal">{{ paper.key }}</span>
+                        {% if paper.bibcode %}
+                        <span class="badge bg-glass-dark text-warning fw-normal" style="font-family:monospace; font-size:0.7rem;">{{ paper.bibcode }}</span>
+                        {% endif %}
+                        {% for cat in paper.categories.all %}
+                        <span class="badge badge-category">{{ cat.name }}</span>
+                        {% endfor %}
+                    </div>
+
+                    {# ── Citation / reference stats row ── #}
+                    <div class="citation-stats mb-3">
+                        {% if paper.ads_citation_count is not None %}
+                        <span class="stat-chip ads" title="Global citations on ADS">
+                            <i class="bi bi-graph-up me-1"></i>{{ paper.ads_citation_count }} ADS citations
+                        </span>
+                        {% endif %}
+                        <span class="stat-chip local" title="Cited by Statements in this DB">
+                            <i class="bi bi-pin me-1"></i>{{ paper.cited_by.count }} local citations
+                        </span>
+                        <span class="stat-chip refs"
+                              data-bs-toggle="offcanvas"
+                              data-bs-target="#sidebar{{ paper.id }}"
+                              data-tab="refs"
+                              style="cursor:pointer;"
+                              title="View reference list">
+                            <i class="bi bi-arrow-left-circle me-1"></i>{{ paper.references.count }} refs
+                        </span>
+
+                        <span class="stat-chip cites"
+                            data-bs-toggle="offcanvas"
+                            data-bs-target="#sidebar{{ paper.id }}"
+                            data-tab="cites"
+                            style="cursor:pointer;">
+                            <i class="bi bi-arrow-right-circle me-1"></i>{{ paper.papers_cited_by.count }} citing
+                        </span>
+
+
+                        {% if paper.last_ads_updated %}
+                        <span class="last-updated ms-1">
+                            <i class="bi bi-clock me-1"></i>Updated {{ paper.last_ads_updated|date:"d M Y H:i" }} UT
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex gap-2 flex-wrap mb-3">
+                        <a class="btn btn-sm btn-outline-secondary px-4" href="/papers/pdf/{{ paper.key }}.pdf" target="_blank">
+                            <i class="bi bi-file-earmark-pdf"></i> PDF
+                        </a>
+                        {% if paper.abstract %}
+                            <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#abs{{ paper.id }}">Abstract</button>
+                        {% else %}
+                            <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#addAbstractModal{{ paper.id }}">➕ Add Abstract</button>
+                        {% endif %}
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#bib{{ paper.id }}">Source</button>
+
+                        {# ── Refs/Citations sidebar trigger ── #}
+                        {% if paper.references.count or paper.citing_papers.count %}
+                        <button class="btn btn-sm btn-outline-warning"
+                                data-bs-toggle="offcanvas"
+                                data-bs-target="#sidebar{{ paper.id }}"
+                                data-tab="refs">
+                            <i class="bi bi-diagram-3"></i> Refs / Citing
+                        </button>
+                        {% endif %}
+                    </div>
+
+                    {% if paper.abstract %}
+                    <div class="collapse mt-3" id="abs{{ paper.id }}">
+                        <div class="p-3 bg-glass-dark rounded small text-light border-start border-info border-4">
+                            {{ paper.abstract }}
                         </div>
                     </div>
-                </div>
-            </div>
-            {% endif %}
-        {% endfor %}
+                    {% endif %}
 
-    </main>
-
-    <!-- Add Paper Modal -->
-    <div class="modal fade" id="addPaperModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content" style="background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 20px;">
-                <div class="modal-header border-glass-separator">
-                    <h5 class="modal-title text-white">Add BibTeX Entry</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <div class="collapse mt-3" id="bib{{ paper.id }}">
+                        <pre class="bibtex-pre">{{ paper.bibtex }}</pre>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <form method="post" action="{% url 'papers:add_paper' %}">
+
+                <div class="col-lg-3 border-start border-glass-separator">
+                    <form method="post" action="{% url 'papers:update_categories' paper.id %}">
                         {% csrf_token %}
-                        <textarea name="bibtex" rows="12" class="form-control font-monospace mb-3" placeholder="@article{key, ...}"></textarea>
-                        <div class="d-flex justify-content-end gap-2">
-                            <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary px-4">Save Paper</button>
+                        <p class="small text-uppercase mb-2 fw-bold text-muted" style="font-size:0.7rem;">Quick Update</p>
+                        <div class="category-sidebar-list mb-2">
+                            {% for cat in categories %}
+                            <div class="form-check mb-1">
+                                <input class="form-check-input" type="checkbox" name="categories" value="{{ cat.id }}" id="p{{ paper.id }}c{{ cat.id }}" {% if cat in paper.categories.all %}checked{% endif %}>
+                                <label class="form-check-label text-white-50" style="font-size:0.8rem;" for="p{{ paper.id }}c{{ cat.id }}">{{ cat.name }}</label>
+                            </div>
+                            {% endfor %}
                         </div>
+                        <button type="submit" class="btn btn-sm btn-warning w-100 fw-bold shadow-sm">Update</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
 
-    <script>
-    /* Three.js Background Logic */
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.getElementById('canvas-container').appendChild(renderer.domElement);
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="sidebar{{ paper.id }}" aria-labelledby="sidebarLabel{{ paper.id }}">
+        <div class="offcanvas-header">
+            <div>
+                <h6 class="offcanvas-title text-white mb-0" id="sidebarLabel{{ paper.id }}">
+                    <i class="bi bi-diagram-3 me-2 text-info"></i>{{ paper.key }}
+                </h6>
+                <small class="text-muted" style="font-size:0.72rem;">{{ paper.title|truncatechars:70 }}</small>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body p-3">
 
-    const group = new THREE.Group();
-    scene.add(group);
+            {# Tab switcher #}
+            <ul class="nav offcanvas-tabs gap-2 mb-3" id="tabs{{ paper.id }}">
+                <li class="nav-item">
+                    <button class="nav-link active" data-tab-target="refs{{ paper.id }}" onclick="switchTab(this, 'refs{{ paper.id }}')">
+                        <i class="bi bi-arrow-left-circle me-1"></i>References ({{ paper.references.count }})
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-tab-target="cites{{ paper.id }}" onclick="switchTab(this, 'cites{{ paper.id }}')">
+                        <i class="bi bi-arrow-right-circle me-1"></i>Citing ({{ paper.papers_cited_by.count }})
 
-    const particlesCount = 120;
-    const geo = new THREE.SphereGeometry(0.02, 8, 8);
-    const mat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
-    
-    for (let i = 0; i < particlesCount; i++) {
-        const mesh = new THREE.Mesh(geo, mat);
-        mesh.position.set((Math.random()-0.5)*15, (Math.random()-0.5)*15, (Math.random()-0.5)*10);
-        mesh.userData.velocity = new THREE.Vector3((Math.random()-0.5)*0.01, (Math.random()-0.5)*0.01, (Math.random()-0.5)*0.01);
-        group.add(mesh);
-    }
+                    </button>
+                </li>
+            </ul>
 
-    camera.position.z = 5;
+            {# References pane #}
+            <div id="refs{{ paper.id }}" class="tab-pane-content">
+                {% for ref in paper.references.all %}
+                <div class="sat-paper-item {% if ref.core %}is-core{% endif %}" id="sat-item-{{ ref.id }}">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div class="flex-grow-1">
+                            <div class="sat-title">{{ ref.title|default:"(no title)" }}</div>
+                            <div class="sat-meta">
+                                {{ ref.authors|truncatechars:60 }} · {{ ref.year }}
+                                {% if ref.journal %} · <em>{{ ref.journal }}</em>{% endif %}
+                            </div>
+                            <div class="sat-bibcode mt-1">{{ ref.bibcode }}</div>
+                        </div>
+                        <div class="d-flex flex-column gap-1 align-items-end" style="min-width:80px;">
+                            {% if ref.core %}
+                                <span class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-25" style="font-size:0.65rem;">CORE</span>
+                            {% else %}
+                                <button class="btn btn-xs btn-outline-info make-core-btn"
+                                        style="font-size:0.68rem; padding:2px 8px;"
+                                        data-paper-id="{{ ref.id }}"
+                                        data-item-id="sat-item-{{ ref.id }}">
+                                    Make Core
+                                </button>
+                            {% endif %}
+                            {% if ref.adsurl %}
+                            <a href="{{ ref.adsurl }}" target="_blank" class="btn btn-xs btn-outline-secondary" style="font-size:0.65rem; padding:2px 6px;">ADS</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted small text-center mt-4">No references linked yet.<br>Click <strong>Update Details</strong> to fetch from ADS.</p>
+                {% endfor %}
+            </div>
 
-    function animate() {
-        requestAnimationFrame(animate);
-        group.children.forEach(p => {
-            p.position.add(p.userData.velocity);
-            if(Math.abs(p.position.x) > 8) p.userData.velocity.x *= -1;
-            if(Math.abs(p.position.y) > 8) p.userData.velocity.y *= -1;
-        });
-        group.rotation.y += 0.001;
-        renderer.render(scene, camera);
-    }
-    animate();
+            {# Citing papers pane (hidden by default) #}
+            <div id="cites{{ paper.id }}" class="tab-pane-content" style="display:none;">
+                {% for citer in paper.papers_cited_by.all %}
+                <div class="sat-paper-item {% if citer.core %}is-core{% endif %}" id="sat-item-{{ citer.id }}">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div class="flex-grow-1">
+                            <div class="sat-title">{{ citer.title|default:"(no title)" }}</div>
+                            <div class="sat-meta">
+                                {{ citer.authors|truncatechars:60 }} · {{ citer.year }}
+                                {% if citer.journal %} · <em>{{ citer.journal }}</em>{% endif %}
+                            </div>
+                            <div class="sat-bibcode mt-1">{{ citer.bibcode }}</div>
+                        </div>
+                        <div class="d-flex flex-column gap-1 align-items-end" style="min-width:80px;">
+                            {% if citer.core %}
+                                <span class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-25" style="font-size:0.65rem;">CORE</span>
+                            {% else %}
+                                <button class="btn btn-xs btn-outline-info make-core-btn"
+                                        style="font-size:0.68rem; padding:2px 8px;"
+                                        data-paper-id="{{ citer.id }}"
+                                        data-item-id="sat-item-{{ citer.id }}">
+                                    Make Core
+                                </button>
+                            {% endif %}
+                            {% if citer.adsurl %}
+                            <a href="{{ citer.adsurl }}" target="_blank" class="btn btn-xs btn-outline-secondary" style="font-size:0.65rem; padding:2px 6px;">ADS</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted small text-center mt-4">No citing papers linked yet.<br>Click <strong>Update Details</strong> to fetch from ADS.</p>
+                {% endfor %}
+            </div>
 
-    /* Original JS Functions */
-    function copyBibtex(paperKey, rawBibtex) {
-        if (!rawBibtex) return;
-        const modified = rawBibtex.replace(/@(\w+)\s*\{[^,]*,/, (_, type) => `@${type}{${paperKey},`);
-        navigator.clipboard.writeText(modified);
-    }
+        </div>
+    </div>
+    {% endfor %}
 
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
+    {# ── Abstract modals (outside card loop to avoid stacking context issues) ── #}
+    {% for paper in papers %}
+        {% if not paper.abstract %}
+        <div class="modal fade" id="addAbstractModal{{ paper.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content" style="background:rgba(15,23,42,0.95)!important; backdrop-filter:blur(15px); border:1px solid var(--glass-border); border-radius:20px;">
+                    <div class="modal-header border-glass-separator">
+                        <h5 class="modal-title text-white">Add Abstract</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="small text-muted mb-3">{{ paper.title }}</p>
+                        <form method="post" action="{% url 'papers:add_abstract' paper.id %}">
+                            {% csrf_token %}
+                            <textarea name="abstract" rows="8" class="form-control mb-3" placeholder="Write or paste abstract here..."></textarea>
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary px-4">Save Abstract</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+</main>
+
+<!-- Add Paper Modal -->
+<div class="modal fade" id="addPaperModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background:rgba(15,23,42,0.8); backdrop-filter:blur(15px); border:1px solid var(--glass-border); border-radius:20px;">
+            <div class="modal-header border-glass-separator">
+                <h5 class="modal-title text-white">Add BibTeX Entry</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'papers:add_paper' %}">
+                    {% csrf_token %}
+                    <textarea name="bibtex" rows="12" class="form-control font-monospace mb-3" placeholder="@article{key, ...}"></textarea>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary px-4">Save Paper</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+
+<script>
+/* ── Three.js background ─────────────────────────────────────────────────── */
+const scene    = new THREE.Scene();
+const camera   = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+const group = new THREE.Group();
+scene.add(group);
+
+const geo = new THREE.SphereGeometry(0.02, 8, 8);
+const mat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+for (let i = 0; i < 120; i++) {
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set((Math.random()-0.5)*15, (Math.random()-0.5)*15, (Math.random()-0.5)*10);
+    mesh.userData.velocity = new THREE.Vector3((Math.random()-0.5)*0.01, (Math.random()-0.5)*0.01, (Math.random()-0.5)*0.01);
+    group.add(mesh);
+}
+camera.position.z = 5;
+
+(function animate() {
+    requestAnimationFrame(animate);
+    group.children.forEach(p => {
+        p.position.add(p.userData.velocity);
+        if (Math.abs(p.position.x) > 8) p.userData.velocity.x *= -1;
+        if (Math.abs(p.position.y) > 8) p.userData.velocity.y *= -1;
     });
-    </script>
+    group.rotation.y += 0.001;
+    renderer.render(scene, camera);
+})();
+
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+/* ── Copy BibTeX ─────────────────────────────────────────────────────────── */
+function copyBibtex(paperKey, rawBibtex) {
+    if (!rawBibtex) return;
+    const modified = rawBibtex.replace(/@(\w+)\s*\{[^,]*,/, (_, type) => `@${type}{${paperKey},`);
+    navigator.clipboard.writeText(modified);
+}
+
+/* ── Offcanvas tab switcher ──────────────────────────────────────────────── */
+function switchTab(btn, targetId) {
+    // find all panes and tabs within same offcanvas
+    const offcanvas = btn.closest('.offcanvas-body');
+    offcanvas.querySelectorAll('.tab-pane-content').forEach(p => p.style.display = 'none');
+    offcanvas.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+    document.getElementById(targetId).style.display = 'block';
+    btn.classList.add('active');
+}
+
+/* ── Open offcanvas on correct tab when clicking stat chips ─────────────── */
+document.querySelectorAll('[data-tab]').forEach(el => {
+    el.addEventListener('click', function () {
+        const target = this.getAttribute('data-bs-target');   // e.g. #sidebar42
+        const tab    = this.getAttribute('data-tab');         // refs or cites
+        const paperId = target.replace('#sidebar', '');
+        // Switch tab after offcanvas opens
+        setTimeout(() => {
+            const paneId = tab + paperId;
+            const offcanvas = document.querySelector(target + ' .offcanvas-body');
+            if (!offcanvas) return;
+            offcanvas.querySelectorAll('.tab-pane-content').forEach(p => p.style.display = 'none');
+            offcanvas.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+            const pane = document.getElementById(paneId);
+            if (pane) pane.style.display = 'block';
+            const activeBtn = offcanvas.querySelector(`[data-tab-target="${paneId}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+        }, 150);
+    });
+});
+
+/* ── Make Core (AJAX) ────────────────────────────────────────────────────── */
+document.querySelectorAll('.make-core-btn').forEach(btn => {
+    btn.addEventListener('click', async function () {
+        const paperId = this.dataset.paperId;
+        const itemId  = this.dataset.itemId;
+        const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+
+        try {
+            const resp = await fetch(`/papers/paper/${paperId}/make-core/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/json' },
+            });
+            if (resp.ok) {
+                const item = document.getElementById(itemId);
+                if (item) {
+                    item.classList.add('is-core');
+                    // Replace button with CORE badge
+                    this.outerHTML = `<span class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-25" style="font-size:0.65rem;">CORE</span>`;
+                }
+            }
+        } catch (e) {
+            console.error('Make core failed:', e);
+        }
+    });
+});
+
+/* ── ADS update button spinner ───────────────────────────────────────────── */
+document.querySelectorAll('.ads-update-form').forEach(form => {
+    form.addEventListener('submit', function () {
+        const btn = this.querySelector('.ads-update-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spin"><i class="bi bi-arrow-clockwise"></i></span> Updating…';
+    });
+});
+
+/* ── Auto-dismiss session flash after 6s ────────────────────────────────── */
+setTimeout(() => {
+    document.querySelectorAll('.alert-dismissible').forEach(a => {
+        const bsAlert = bootstrap.Alert.getOrCreateInstance(a);
+        bsAlert.close();
+    });
+}, 6000);
+</script>
 </body>
 </html>
