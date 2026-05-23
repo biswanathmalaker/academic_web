@@ -30,16 +30,10 @@ from .forms import StatementForm
 #     return render(request, "papers/index.html", {"papers": papers})
 
 import os
+import re
 from django.conf import settings
 from django.shortcuts import render
 from .models import Paper
-
-
-import os
-from django.conf import settings
-from django.shortcuts import render
-from .models import Paper
-
 
 
 # ── Paste these two views into your existing papers/views.py ────────────────
@@ -47,6 +41,7 @@ from .models import Paper
 #   from .utils import save_bibtex, fetch_and_update_from_ads
 
 import json
+from django.db.models import Q
 from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404, redirect
 from django.http import JsonResponse
@@ -91,6 +86,12 @@ def make_core(request, paper_id):
 
 
 
+def paper_relations(request, paper_id):
+    paper = get_object_or_404(Paper, pk=paper_id)
+    active_tab = request.GET.get("tab", "refs")
+    return render(request, "papers/_paper_relations.html", {"paper": paper, "active_tab": active_tab})
+
+
 
 def get_filtered_papers(request):
     filter_option = request.GET.get("filter")
@@ -100,35 +101,51 @@ def get_filtered_papers(request):
         filter_option = request.session.get("papers_filter", "all_papers")
 
     form_name = request.GET.get("form_name")
-    if form_name == "category_filter":
+    if form_name in ["category_filter", "abstract_search"]:
         category_filter = request.GET.getlist("category")
         request.session["category_filter"] = category_filter
     else:
         category_filter = request.session.get("category_filter", [])
 
-    papers = Paper.objects.all().order_by("-year")
-    pdf_dir = os.path.join(settings.BASE_DIR, "papers", "pdf")
+    if request.GET.get("abstract_query") is not None:
+        abstract_query = request.GET.get("abstract_query", "").strip()
+        request.session["abstract_query"] = abstract_query
+    else:
+        abstract_query = request.session.get("abstract_query", "").strip()
 
-    if filter_option == "only_pdf_available":
-        papers = [p for p in papers if os.path.exists(os.path.join(pdf_dir, f"{p.key}.pdf"))]
-    elif filter_option == "only_non_pdf":
-        papers = [p for p in papers if not os.path.exists(os.path.join(pdf_dir, f"{p.key}.pdf"))]
+    pdf_dir = os.path.join(settings.BASE_DIR, "papers", "pdf")
+    papers = Paper.objects.all()
+
+    if filter_option == "core_only":
+        papers = papers.filter(core=True)
+    elif filter_option == "satellite_only":
+        papers = papers.filter(core=False)
     elif filter_option == "papers_cited_by_statements":
-        papers = (
-            Paper.objects
-            .filter(cited_by__isnull=False)
-            .distinct()
-            .order_by("-year")
-        )
+        papers = papers.filter(cited_by__isnull=False).distinct()
 
     if category_filter:
-        papers = [p for p in papers if p.categories.filter(id__in=category_filter).exists()]
+        papers = papers.filter(categories__id__in=category_filter).distinct()
 
-    return papers, filter_option, category_filter
+    if abstract_query:
+        terms = [t for t in re.split(r"[\s,;]+", abstract_query) if t]
+        if terms:
+            abstract_q = Q()
+            for term in terms:
+                abstract_q |= Q(abstract__icontains=term)
+            papers = papers.filter(abstract_q)
+
+    if filter_option == "only_pdf_available":
+        papers = [p for p in papers.order_by("-year") if os.path.exists(os.path.join(pdf_dir, f"{p.key}.pdf"))]
+    elif filter_option == "only_non_pdf":
+        papers = [p for p in papers.order_by("-year") if not os.path.exists(os.path.join(pdf_dir, f"{p.key}.pdf"))]
+    else:
+        papers = papers.order_by("-year")
+
+    return papers, filter_option, category_filter, abstract_query
 
 
 def index(request):
-    papers, filter_option, category_filter = get_filtered_papers(request)
+    papers, filter_option, category_filter, abstract_query = get_filtered_papers(request)
     categories = Category.objects.all()
     return render(
         request,
@@ -138,6 +155,7 @@ def index(request):
             "filter_option": filter_option,
             "categories": categories,
             "category_filter": category_filter,
+            "abstract_query": abstract_query,
         }
     )
 
@@ -382,12 +400,12 @@ def add_abstract(request, paper_id):
 
 
 def all_papers_detail(request):
-    papers, _, _ = get_filtered_papers(request)
+    papers, _, _, _ = get_filtered_papers(request)
     return render(request, "papers/all_papers_detail.html", {"papers": papers})
 
 
 def all_papers_pdf(request):
-    papers, _, _ = get_filtered_papers(request)
+    papers, _, _, _ = get_filtered_papers(request)
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
     styles = getSampleStyleSheet()

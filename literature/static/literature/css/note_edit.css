@@ -1,0 +1,341 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 0 20px;
+    background: #f9f9f9;
+}
+
+h1 {
+    color: #333;
+}
+
+.meta-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 16px;
+    align-items: flex-end;
+}
+
+.meta-row .field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.meta-row .field-title {
+    flex: 1;
+}
+
+.meta-row label {
+    font-weight: bold;
+    color: #555;
+    font-size: 0.9em;
+}
+
+.meta-row input[type=text] {
+    padding: 8px 12px;
+    font-size: 1.05em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.meta-row input[type=number] {
+    width: 80px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* ── Sticky toolbar ── */
+#toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 8px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+#toolbar button {
+    padding: 5px 11px;
+    border: 1px solid #ccc;
+    background: #f5f5f5;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.88em;
+    transition: background 0.15s;
+    user-select: none;
+}
+
+#toolbar button:hover {
+    background: #e0e0e0;
+}
+
+#toolbar button.is-active {
+    background: #333;
+    color: #fff;
+    border-color: #333;
+}
+
+#toolbar .sep {
+    width: 1px;
+    background: #ccc;
+    margin: 2px 4px;
+    align-self: stretch;
+}
+
+/* ── Editor ── */
+#editor-wrapper {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 0 0 6px 6px;
+    min-height: 420px;
+    padding: 16px;
+    cursor: text;
+}
+
+#editor-wrapper:focus-within {
+    border-color: #888;
+    box-shadow: 0 0 0 2px rgba(0,102,204,0.1);
+}
+
+.ProseMirror {
+    outline: none;
+    min-height: 380px;
+    font-size: 1em;
+    line-height: 1.75;
+}
+
+.ProseMirror p {
+    margin: 0.35em 0;
+}
+
+.ProseMirror ul {
+    list-style: disc;
+    padding-left: 1.5em;
+    margin: 0.35em 0;
+}
+
+.ProseMirror ol {
+    list-style: decimal;
+    padding-left: 1.5em;
+    margin: 0.35em 0;
+}
+
+.ProseMirror li {
+    margin: 0.15em 0;
+}
+
+.ProseMirror h1 {
+    font-size: 1.6em;
+    margin: 0.6em 0 0.25em;
+}
+
+.ProseMirror h2 {
+    font-size: 1.35em;
+    margin: 0.55em 0 0.2em;
+}
+
+.ProseMirror h3 {
+    font-size: 1.15em;
+    margin: 0.5em 0 0.15em;
+}
+
+/* ── Resizable image node ── */
+.img-node-wrap {
+    display: block;
+    position: relative;
+    width: fit-content;
+    max-width: 100%;
+    margin: 8px 0;
+    user-select: none;
+}
+
+.img-node-wrap img {
+    display: block;
+    border-radius: 4px;
+    border: 2px solid transparent;
+    transition: border-color 0.15s;
+}
+
+.img-node-wrap:hover img,
+.img-node-wrap.selected img {
+    border-color: #0066cc;
+}
+
+/* Drag handle — bottom-right corner */
+.img-resize-handle {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 14px;
+    height: 14px;
+    background: #0066cc;
+    border-radius: 2px;
+    cursor: se-resize;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.img-node-wrap:hover .img-resize-handle,
+.img-node-wrap.selected .img-resize-handle {
+    opacity: 1;
+}
+
+/* LaTeX nodes */
+.latex-inline-node {
+    display: inline-block;
+    background: #f0f4ff;
+    border: 1px solid #b0c0e8;
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin: 0 2px;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.latex-block-node {
+    display: block;
+    background: #f0f4ff;
+    border: 1px solid #b0c0e8;
+    border-radius: 6px;
+    padding: 10px 16px;
+    margin: 10px 0;
+    text-align: center;
+    cursor: pointer;
+    overflow-x: auto;
+}
+
+/* Actions */
+.actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.actions button[type=submit] {
+    padding: 10px 28px;
+    background: #0066cc;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.actions button[type=submit]:hover {
+    background: #0052a3;
+}
+
+.actions a {
+    color: #666;
+    text-decoration: none;
+}
+
+.actions a:hover {
+    text-decoration: underline;
+}
+
+/* LaTeX modal */
+#latex-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+#latex-modal.open {
+    display: flex;
+}
+
+.modal-box {
+    background: #fff;
+    border-radius: 8px;
+    padding: 24px;
+    width: 520px;
+    max-width: 95vw;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+.modal-box h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.modal-box textarea {
+    width: 100%;
+    height: 90px;
+    font-family: monospace;
+    font-size: 1em;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+}
+
+#latex-preview {
+    min-height: 44px;
+    background: #f0f4ff;
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin: 10px 0;
+    text-align: center;
+    font-size: 1.15em;
+    overflow-x: auto;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.modal-actions button {
+    padding: 8px 22px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    font-size: 0.95em;
+}
+
+.btn-insert {
+    background: #0066cc;
+    color: #fff;
+    border-color: #0066cc !important;
+}
+
+.btn-cancel {
+    background: #f5f5f5;
+}
+
+.mode-toggle {
+    margin: 8px 0;
+    font-size: 0.9em;
+    color: #555;
+}
+
+.mode-toggle label {
+    cursor: pointer;
+}
+
+#editor-loading {
+    padding: 20px;
+    color: #888;
+    font-style: italic;
+}

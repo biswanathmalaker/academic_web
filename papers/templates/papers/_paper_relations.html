@@ -1,0 +1,74 @@
+<ul class="nav offcanvas-tabs gap-2 mb-3" id="tabs{{ paper.id }}">
+    <li class="nav-item">
+        <button class="nav-link {% if active_tab == 'refs' %}active{% endif %}" data-tab-target="refs{{ paper.id }}" onclick="switchTab(this, 'refs{{ paper.id }}')">
+            <i class="bi bi-arrow-left-circle me-1"></i>References ({{ paper.references.count }})
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link {% if active_tab == 'cites' %}active{% endif %}" data-tab-target="cites{{ paper.id }}" onclick="switchTab(this, 'cites{{ paper.id }}')">
+            <i class="bi bi-arrow-right-circle me-1"></i>Citing ({{ paper.papers_cited_by.count }})
+        </button>
+    </li>
+</ul>
+
+<div id="refs{{ paper.id }}" class="tab-pane-content" style="{% if active_tab != 'refs' %}display:none;{% endif %}">
+    {% for ref in paper.references.all %}
+    <div class="sat-paper-item {% if ref.core %}is-core{% endif %}" id="sat-item-{{ ref.id }}">
+        <div class="d-flex justify-content-between align-items-start gap-2">
+            <div class="flex-grow-1">
+                <div class="sat-title">{{ ref.title|default:"(no title)" }}</div>
+                <div class="sat-meta">
+                    {{ ref.authors|truncatechars:60 }} · {{ ref.year }}
+                    {% if ref.journal %} · <em>{{ ref.journal }}</em>{% endif %}
+                </div>
+                <div class="sat-bibcode mt-1">{{ ref.bibcode }}</div>
+            </div>
+            <div class="d-flex flex-column gap-1 align-items-end" style="min-width:80px;">
+                {% if ref.core %}
+                    <span class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-25" style="font-size:0.65rem;">CORE</span>
+                {% else %}
+                    <button class="btn btn-xs btn-outline-info make-core-btn" style="font-size:0.68rem; padding:2px 8px;" data-paper-id="{{ ref.id }}" data-item-id="sat-item-{{ ref.id }}">
+                        Make Core
+                    </button>
+                {% endif %}
+                {% if ref.adsurl %}
+                <a href="{{ ref.adsurl }}" target="_blank" class="btn btn-xs btn-outline-secondary" style="font-size:0.65rem; padding:2px 6px;">ADS</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-muted small text-center mt-4">No references linked yet.<br>Click <strong>Update Details</strong> to fetch from ADS.</p>
+    {% endfor %}
+</div>
+
+<div id="cites{{ paper.id }}" class="tab-pane-content" style="{% if active_tab != 'cites' %}display:none;{% endif %}">
+    {% for citer in paper.papers_cited_by.all %}
+    <div class="sat-paper-item {% if citer.core %}is-core{% endif %}" id="sat-item-{{ citer.id }}">
+        <div class="d-flex justify-content-between align-items-start gap-2">
+            <div class="flex-grow-1">
+                <div class="sat-title">{{ citer.title|default:"(no title)" }}</div>
+                <div class="sat-meta">
+                    {{ citer.authors|truncatechars:60 }} · {{ citer.year }}
+                    {% if citer.journal %} · <em>{{ citer.journal }}</em>{% endif %}
+                </div>
+                <div class="sat-bibcode mt-1">{{ citer.bibcode }}</div>
+            </div>
+            <div class="d-flex flex-column gap-1 align-items-end" style="min-width:80px;">
+                {% if citer.core %}
+                    <span class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-25" style="font-size:0.65rem;">CORE</span>
+                {% else %}
+                    <button class="btn btn-xs btn-outline-info make-core-btn" style="font-size:0.68rem; padding:2px 8px;" data-paper-id="{{ citer.id }}" data-item-id="sat-item-{{ citer.id }}">
+                        Make Core
+                    </button>
+                {% endif %}
+                {% if citer.adsurl %}
+                <a href="{{ citer.adsurl }}" target="_blank" class="btn btn-xs btn-outline-secondary" style="font-size:0.65rem; padding:2px 6px;">ADS</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-muted small text-center mt-4">No citing papers linked yet.<br>Click <strong>Update Details</strong> to fetch from ADS.</p>
+    {% endfor %}
+</div>

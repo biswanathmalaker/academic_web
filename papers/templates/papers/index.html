@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{% load static %}<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,217 +6,7 @@
     <title>Papers Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-
-    <style>
-        :root {
-            --bg-main: #020617;
-            --glass-bg: rgba(255, 255, 255, 0.04);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --glass-header: rgba(255, 255, 255, 0.06);
-            --accent-primary: #38bdf8;
-            --accent-secondary: #818cf8;
-            --text-high: #ffffff;
-            --text-medium: #cbd5e1;
-            --text-muted: #94a3b8;
-        }
-
-        body {
-            background: radial-gradient(circle at top right, #0f172a, #020617);
-            background-attachment: fixed;
-            color: var(--text-medium);
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            min-height: 100vh;
-            margin: 0;
-        }
-
-        #canvas-container {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: -1; pointer-events: none;
-        }
-
-        .sticky-filter-header {
-            position: sticky; top: 0; z-index: 1000;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(0.1px);
-            -webkit-backdrop-filter: blur(0.1px);
-            border-bottom: 1px solid var(--glass-border);
-            padding: 1.5rem 0;
-            margin-bottom: 3rem;
-        }
-
-        .paper-card {
-            background: var(--glass-bg) !important;
-            backdrop-filter: blur(1px);
-            -webkit-backdrop-filter: blur(1px);
-            border: 1px solid var(--glass-border) !important;
-            border-radius: 20px;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            margin-bottom: 2.5rem;
-            box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3);
-            animation: fadeIn 0.5s ease forwards;
-            opacity: 0;
-        }
-
-        /* Satellite papers get a subtle dimmed style */
-        .paper-card.satellite {
-            border-color: rgba(148, 163, 184, 0.2) !important;
-            opacity: 0.75;
-        }
-
-        .paper-card:hover {
-            border-color: rgba(56,189,248,0.5) !important;
-            transform: translateY(-8px) scale(1.01);
-            background: rgba(255,255,255,0.0001) !important;
-            box-shadow: 0 12px 40px 0 rgba(0,0,0,0.4);
-        }
-
-        .card-header {
-            background: var(--glass-header) !important;
-            border-bottom: 1px solid var(--glass-border) !important;
-            padding: 1.25rem;
-            border-top-left-radius: 20px !important;
-            border-top-right-radius: 20px !important;
-        }
-
-        .category-sidebar-list {
-            max-height: 150px;
-            overflow-y: auto;
-            background: rgba(0,0,0,0.2);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 10px;
-        }
-        .category-sidebar-list::-webkit-scrollbar { width: 4px; }
-        .category-sidebar-list::-webkit-scrollbar-thumb { background: var(--accent-secondary); border-radius: 10px; }
-
-        .glass-panel {
-            background: rgba(255,255,255,0.03) !important;
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-        }
-
-        .glass-input {
-            background-color: rgba(255,255,255,0.05) !important;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.1) !important;
-            color: #ffffff !important;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .glass-input:focus {
-            background-color: rgba(255,255,255,0.1) !important;
-            border-color: var(--accent-primary) !important;
-            box-shadow: 0 0 0 0.25rem rgba(56,189,248,0.25);
-        }
-        .glass-input option { background-color: #0f172a; color: white; }
-
-        .form-select, .form-control {
-            background: rgba(255,255,255,0.05) !important;
-            border: 1px solid var(--glass-border) !important;
-            color: var(--text-high) !important;
-            backdrop-filter: blur(5px);
-        }
-
-        .badge-category {
-            background: rgba(129,140,248,0.15);
-            color: var(--accent-secondary);
-            border: 1px solid rgba(129,140,248,0.3);
-            backdrop-filter: blur(4px);
-        }
-
-        .bg-glass-dark {
-            background: rgba(0,0,0,0.3) !important;
-            border: 1px solid var(--glass-border) !important;
-        }
-
-        .bibtex-pre {
-            background: rgba(0,0,0,0.4) !important;
-            backdrop-filter: blur(10px);
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            color: #a5d6ff;
-            border: 1px solid var(--glass-border);
-            max-height: 300px;
-            overflow: auto;
-        }
-
-        .border-glass-separator { border-color: var(--glass-border) !important; }
-
-        .modal-backdrop { z-index: 1050 !important; }
-        .modal          { z-index: 1055 !important; }
-
-        /* ── Offcanvas sidebar ─────────────────────────────── */
-        .offcanvas {
-            background: rgba(10, 18, 35, 0.97) !important;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-left: 1px solid var(--glass-border) !important;
-            width: 420px !important;
-        }
-
-        .offcanvas-header { border-bottom: 1px solid var(--glass-border); }
-
-        .sat-paper-item {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 12px 14px;
-            margin-bottom: 10px;
-            transition: border-color 0.2s;
-        }
-        .sat-paper-item:hover { border-color: rgba(56,189,248,0.4); }
-        .sat-paper-item.is-core { border-color: rgba(56,189,248,0.35); }
-
-        .sat-paper-item .sat-title  { font-size: 0.82rem; color: #e2e8f0; line-height: 1.35; }
-        .sat-paper-item .sat-meta   { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; }
-        .sat-paper-item .sat-bibcode { font-size: 0.7rem; font-family: monospace; color: var(--accent-primary); }
-
-        .offcanvas-tabs .nav-link {
-            color: var(--text-muted);
-            border: 1px solid transparent;
-            border-radius: 8px;
-            font-size: 0.85rem;
-        }
-        .offcanvas-tabs .nav-link.active {
-            background: rgba(56,189,248,0.12);
-            border-color: rgba(56,189,248,0.3);
-            color: var(--accent-primary);
-        }
-
-        /* ── Citation count badges ─────────────────────────── */
-        .citation-stats {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .stat-chip {
-            font-size: 0.72rem;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-        .stat-chip.ads   { background: rgba(56,189,248,0.12);  color: #38bdf8; border: 1px solid rgba(56,189,248,0.25); }
-        .stat-chip.local { background: rgba(129,140,248,0.12); color: #818cf8; border: 1px solid rgba(129,140,248,0.25); }
-        .stat-chip.refs  { background: rgba(52,211,153,0.10);  color: #34d399; border: 1px solid rgba(52,211,153,0.25); }
-        .stat-chip.cites { background: rgba(251,146,60,0.10);  color: #fb923c; border: 1px solid rgba(251,146,60,0.25); }
-
-        .last-updated { font-size: 0.68rem; color: var(--text-muted); }
-
-        /* Spinning icon while ADS update is in progress */
-        .spin { animation: spin 1s linear infinite; display: inline-block; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'papers/css/papers.css' %}">
 </head>
 <body>
 
@@ -278,6 +68,25 @@
                             {% endfor %}
                         </div>
                         <button type="submit" class="btn btn-secondary btn-sm">Apply</button>
+                    </div>
+                </form>
+
+                <form method="GET" id="abstractSearchForm" class="mt-3">
+                    <input type="hidden" name="form_name" value="abstract_search">
+                    <input type="hidden" name="filter" value="{{ filter_option }}">
+                    {% for cat_id in category_filter %}
+                        <input type="hidden" name="category" value="{{ cat_id }}">
+                    {% endfor %}
+                    <label class="small text-white mb-1">Search Abstracts</label>
+                    <div class="input-group">
+                        <input
+                            type="text"
+                            name="abstract_query"
+                            value="{{ abstract_query|default:'' }}"
+                            class="form-control form-control-sm glass-input"
+                            placeholder="Search keywords in abstracts (space or comma separated)..."
+                        >
+                        <button type="submit" class="btn btn-secondary btn-sm">Search</button>
                     </div>
                 </form>
             </div>
@@ -582,125 +391,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
-
-<script>
-/* ── Three.js background ─────────────────────────────────────────────────── */
-const scene    = new THREE.Scene();
-const camera   = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.getElementById('canvas-container').appendChild(renderer.domElement);
-
-const group = new THREE.Group();
-scene.add(group);
-
-const geo = new THREE.SphereGeometry(0.02, 8, 8);
-const mat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
-for (let i = 0; i < 120; i++) {
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set((Math.random()-0.5)*15, (Math.random()-0.5)*15, (Math.random()-0.5)*10);
-    mesh.userData.velocity = new THREE.Vector3((Math.random()-0.5)*0.01, (Math.random()-0.5)*0.01, (Math.random()-0.5)*0.01);
-    group.add(mesh);
-}
-camera.position.z = 5;
-
-(function animate() {
-    requestAnimationFrame(animate);
-    group.children.forEach(p => {
-        p.position.add(p.userData.velocity);
-        if (Math.abs(p.position.x) > 8) p.userData.velocity.x *= -1;
-        if (Math.abs(p.position.y) > 8) p.userData.velocity.y *= -1;
-    });
-    group.rotation.y += 0.001;
-    renderer.render(scene, camera);
-})();
-
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-/* ── Copy BibTeX ─────────────────────────────────────────────────────────── */
-function copyBibtex(paperKey, rawBibtex) {
-    if (!rawBibtex) return;
-    const modified = rawBibtex.replace(/@(\w+)\s*\{[^,]*,/, (_, type) => `@${type}{${paperKey},`);
-    navigator.clipboard.writeText(modified);
-}
-
-/* ── Offcanvas tab switcher ──────────────────────────────────────────────── */
-function switchTab(btn, targetId) {
-    // find all panes and tabs within same offcanvas
-    const offcanvas = btn.closest('.offcanvas-body');
-    offcanvas.querySelectorAll('.tab-pane-content').forEach(p => p.style.display = 'none');
-    offcanvas.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
-    document.getElementById(targetId).style.display = 'block';
-    btn.classList.add('active');
-}
-
-/* ── Open offcanvas on correct tab when clicking stat chips ─────────────── */
-document.querySelectorAll('[data-tab]').forEach(el => {
-    el.addEventListener('click', function () {
-        const target = this.getAttribute('data-bs-target');   // e.g. #sidebar42
-        const tab    = this.getAttribute('data-tab');         // refs or cites
-        const paperId = target.replace('#sidebar', '');
-        // Switch tab after offcanvas opens
-        setTimeout(() => {
-            const paneId = tab + paperId;
-            const offcanvas = document.querySelector(target + ' .offcanvas-body');
-            if (!offcanvas) return;
-            offcanvas.querySelectorAll('.tab-pane-content').forEach(p => p.style.display = 'none');
-            offcanvas.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
-            const pane = document.getElementById(paneId);
-            if (pane) pane.style.display = 'block';
-            const activeBtn = offcanvas.querySelector(`[data-tab-target="${paneId}"]`);
-            if (activeBtn) activeBtn.classList.add('active');
-        }, 150);
-    });
-});
-
-/* ── Make Core (AJAX) ────────────────────────────────────────────────────── */
-document.querySelectorAll('.make-core-btn').forEach(btn => {
-    btn.addEventListener('click', async function () {
-        const paperId = this.dataset.paperId;
-        const itemId  = this.dataset.itemId;
-        const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
-
-        try {
-            const resp = await fetch(`/papers/paper/${paperId}/make-core/`, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/json' },
-            });
-            if (resp.ok) {
-                const item = document.getElementById(itemId);
-                if (item) {
-                    item.classList.add('is-core');
-                    // Replace button with CORE badge
-                    this.outerHTML = `<span class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-25" style="font-size:0.65rem;">CORE</span>`;
-                }
-            }
-        } catch (e) {
-            console.error('Make core failed:', e);
-        }
-    });
-});
-
-/* ── ADS update button spinner ───────────────────────────────────────────── */
-document.querySelectorAll('.ads-update-form').forEach(form => {
-    form.addEventListener('submit', function () {
-        const btn = this.querySelector('.ads-update-btn');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spin"><i class="bi bi-arrow-clockwise"></i></span> Updating…';
-    });
-});
-
-/* ── Auto-dismiss session flash after 6s ────────────────────────────────── */
-setTimeout(() => {
-    document.querySelectorAll('.alert-dismissible').forEach(a => {
-        const bsAlert = bootstrap.Alert.getOrCreateInstance(a);
-        bsAlert.close();
-    });
-}, 6000);
-</script>
+<script src="{% static 'papers/js/three-bg.js' %}"></script>
+<script src="{% static 'papers/js/papers.js' %}"></script>
 </body>
 </html>
