@@ -22,6 +22,7 @@ urlpatterns = [
     
     path('papers/all/', views.all_papers_detail, name='all_papers_detail'),
     path('papers/all/pdf/', views.all_papers_pdf, name='all_papers_pdf'),
+    path('export-bib/', views.export_bib, name='export_bib'),
     
     path("statements/", views.statement_list, name="statement_list"),
     path(

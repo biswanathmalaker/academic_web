@@ -47,6 +47,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.http import JsonResponse
 from .models import Paper
 from .utils import save_bibtex, fetch_and_update_from_ads
+import re
 
 @require_POST
 def update_paper_ads(request, paper_id):
@@ -173,6 +174,50 @@ def add_paper(request):
             save_bibtex(bibtex_entry)
         return redirect("papers:index")
     return render(request, "papers/add_paper.html")
+
+
+def export_bib(request):
+    """Export a .bib file for the currently filtered papers.
+
+    Respects the same filtering logic as `index` by reusing
+    `get_filtered_papers(request)` so the download matches the
+    visible list. Each entry's citation key is replaced with the
+    local `paper.key` (same transformation as the client-side
+    `copyBibtex` function).
+    """
+    papers, filter_option, category_filter, abstract_query = get_filtered_papers(request)
+
+    entries = []
+    for paper in papers:
+        raw = (paper.bibtex or "").strip()
+        if raw:
+            def _replace_key(m):
+                typ = m.group(1)
+                return f"@{typ}{{{paper.key},"
+
+            modified = re.sub(r'@(\w+)\s*\{[^,]*,', _replace_key, raw, count=1)
+            entries.append(modified.strip())
+        else:
+            # Fallback minimal bib entry when no raw BibTeX is stored
+            authors = paper.authors or ""
+            title = paper.title or ""
+            year = paper.year or ""
+            journal = paper.journal or ""
+            bib = (
+                f"@ARTICLE{{{paper.key},\n"
+                f"       author = {{{authors}}},\n"
+                f"        title = {{{title}}},\n"
+                f"      journal = {{{journal}}},\n"
+                f"         year = {year},\n"
+                f"}}"
+            )
+            entries.append(bib)
+
+    content = "\n\n".join(entries).strip() + "\n"
+    filename = f"papers_{filter_option}.bib" if filter_option else "papers.bib"
+    resp = HttpResponse(content, content_type="application/x-bibtex")
+    resp["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return resp
 
 
 

@@ -31,6 +31,7 @@
                 <li class="nav-item"><a class="nav-link text-light" href="{% url 'literature:index' %}">Literature</a></li>
                 <li class="nav-item"><a class="nav-link text-light" href="{% url 'papers:all_papers_detail' %}">Detail View</a></li>
                 <li class="nav-item"><a class="nav-link text-light" href="{% url 'papers:statement_list' %}">all Statements</a></li>
+                <li class="nav-item"><a class="nav-link text-light" href="{% url 'papers:export_bib' %}?{{ request.GET.urlencode }}">Download .bib</a></li>
                 <li class="nav-item"><button class="btn btn-primary btn-sm px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addPaperModal">➕ Add Paper</button></li>
             </ul>
         </div>

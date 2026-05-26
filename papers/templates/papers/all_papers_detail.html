@@ -15,6 +15,7 @@
   {{ forloop.counter }}. {{ paper.title|default:"(No Title)" }}
   Authors: {{ paper.authors }}
   Year: {{ paper.year }}
+  Key: {{ paper.key }}
   {% if paper.journal %}Journal: {{ paper.journal }}{% endif %}
   Abstract:
   {{ paper.abstract|default:"No abstract available." }}
