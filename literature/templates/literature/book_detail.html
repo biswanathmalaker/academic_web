@@ -1,0 +1,347 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Literature App - {{ book.book_name }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <link rel="stylesheet" href="{% static 'literature/css/literature.css' %}">
+</head>
+<body>
+<div class="page-shell">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">{{ book.book_name }}</h1>
+            <p class="page-caption">A clean view of this book, with chapters and notes laid out for a more tactile reading experience.</p>
+        </div>
+        <div class="page-actions">
+            <a class="button button-secondary" href="{% url 'literature:index' %}">⬅️ Back to Books</a>
+            <a class="button button-primary" href="{% url 'literature:add_book' %}">➕ Add Book</a>
+        </div>
+    </div>
+
+    <div class="hero-card book-detail">
+        <h2>📚 {{ book.book_name }}</h2>
+        <p>{{ book.preface }}</p>
+        <div class="hero-actions">
+            <a class="button button-secondary" href="{% url 'literature:update_book' book.id %}">✏️ Edit Book</a>
+            <a class="button button-secondary" href="{% url 'literature:delete_book' book.id %}" onclick="return confirm('Delete this book and all its content?')">🗑️ Delete Book</a>
+            <a class="button button-primary" href="{% url 'literature:add_chapter' %}?book={{ book.id }}">➕ Add Chapter</a>
+        </div>
+    </div>
+
+    <ul class="chapter-list" id="chapter-list-{{ book.id }}" data-book-id="{{ book.id }}">
+        {% for chapter in book.chapters.all %}
+            <li class="draggable-chapter" data-chapter-id="{{ chapter.id }}">
+                <b>Chapter: {{ chapter.chapter_name }}</b>
+                {% if chapter.codes.count > 0 %}<span class="code-count">{{ chapter.codes.count }} code(s)</span>{% endif %}
+                {% if chapter.notes.count > 0 %}<span class="note-count">{{ chapter.notes.count }} note(s)</span>{% endif %}
+                <br><small>{{ chapter.chapter_introduction }}</small>
+
+                {% if chapter.notes.exists %}
+                <ul class="note-list" id="note-list-chapter-{{ chapter.id }}">
+                {% for note in chapter.notes.all %}
+                    <li class="draggable-note" data-note-id="{{ note.id }}">
+                        {% if note.title %}<div class="note-title">📝 {{ note.title }}</div>{% endif %}
+                        <div class="note-body">{{ note.content|json_script:note.id }}</div>
+                        <div class="note-actions">
+                            <a href="{% url 'literature:edit_note' note.id %}">✏️ Edit Note</a>
+                            <a href="{% url 'literature:delete_note' note.id %}" class="del" onclick="return confirm('Delete this note?')">🗑️ Delete</a>
+                        </div>
+                    </li>
+                {% endfor %}
+                </ul>
+                {% endif %}
+
+                <div class="action-links">
+                    <a href="{% url 'literature:update_chapter' chapter.id %}">✏️ Edit</a>
+                    <a href="{% url 'literature:delete_chapter' chapter.id %}" onclick="return confirm('Delete this chapter and all its content?')">🗑️ Delete</a>
+                    <a href="{% url 'literature:add_section' %}?chapter={{ chapter.id }}">➕ Add Section</a>
+                    <a href="{% url 'literature:add_code' %}?chapter={{ chapter.id }}">💻 Add Code</a>
+                    <a href="{% url 'literature:add_note' %}?chapter={{ chapter.id }}" class="note-link">📝 Add Note</a>
+                    {% if chapter.codes.count > 0 %}<a href="{% url 'literature:view_codes' %}?chapter={{ chapter.id }}" class="view-codes-link">👁️ View Codes</a>{% endif %}
+                </div>
+
+                <ul class="section-list" id="section-list-{{ chapter.id }}" data-chapter-id="{{ chapter.id }}">
+                {% for section in chapter.sections.all %}
+                    <li class="draggable-section" data-section-id="{{ section.id }}">
+                        <b>Section: {{ section.section_name }}</b>
+                        {% if section.codes.count > 0 %}<span class="code-count">{{ section.codes.count }} code(s)</span>{% endif %}
+                        {% if section.notes.count > 0 %}<span class="note-count">{{ section.notes.count }} note(s)</span>{% endif %}
+                        <br><small>{{ section.section_introduction }}</small>
+
+                        {% if section.notes.exists %}
+                        <ul class="note-list" id="note-list-section-{{ section.id }}">
+                        {% for note in section.notes.all %}
+                            <li class="draggable-note" data-note-id="{{ note.id }}">
+                                {% if note.title %}<div class="note-title">📝 {{ note.title }}</div>{% endif %}
+                                <div class="note-body">{{ note.content|json_script:note.id }}</div>
+                                <div class="note-actions">
+                                    <a href="{% url 'literature:edit_note' note.id %}">✏️ Edit Note</a>
+                                    <a href="{% url 'literature:delete_note' note.id %}" class="del" onclick="return confirm('Delete this note?')">🗑️ Delete</a>
+                                </div>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                        {% endif %}
+
+                        <div class="action-links">
+                            <a href="{% url 'literature:update_section' section.id %}">✏️ Edit</a>
+                            <a href="{% url 'literature:delete_section' section.id %}" onclick="return confirm('Delete this section and all its content?')">🗑️ Delete</a>
+                            <a href="{% url 'literature:add_subsection' %}?section={{ section.id }}">➕ Add Subsection</a>
+                            <a href="{% url 'literature:add_code' %}?section={{ section.id }}">💻 Add Code</a>
+                            <a href="{% url 'literature:add_note' %}?section={{ section.id }}" class="note-link">📝 Add Note</a>
+                            {% if section.codes.count > 0 %}<a href="{% url 'literature:view_codes' %}?section={{ section.id }}" class="view-codes-link">👁️ View Codes</a>{% endif %}
+                        </div>
+
+                        <ul class="subsection-list" id="subsection-list-{{ section.id }}" data-section-id="{{ section.id }}">
+                        {% for subsection in section.subsections.all %}
+                            <li class="draggable-subsection" data-subsection-id="{{ subsection.id }}">
+                                <b>Subsection: {{ subsection.subsection_name }}</b>
+                                {% if subsection.codes.count > 0 %}<span class="code-count">{{ subsection.codes.count }} code(s)</span>{% endif %}
+                                {% if subsection.notes.count > 0 %}<span class="note-count">{{ subsection.notes.count }} note(s)</span>{% endif %}
+                                <br><small>{{ subsection.subsection_introduction }}</small>
+
+                                {% if subsection.notes.exists %}
+                                <ul class="note-list" id="note-list-subsection-{{ subsection.id }}">
+                                {% for note in subsection.notes.all %}
+                                    <li class="draggable-note" data-note-id="{{ note.id }}">
+                                        {% if note.title %}<div class="note-title">📝 {{ note.title }}</div>{% endif %}
+                                        <div class="note-body">{{ note.content|json_script:note.id }}</div>
+                                        <div class="note-actions">
+                                            <a href="{% url 'literature:edit_note' note.id %}">✏️ Edit Note</a>
+                                            <a href="{% url 'literature:delete_note' note.id %}" class="del" onclick="return confirm('Delete this note?')">🗑️ Delete</a>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                                </ul>
+                                {% endif %}
+
+                                <div class="action-links">
+                                    <a href="{% url 'literature:update_subsection' subsection.id %}">✏️ Edit</a>
+                                    <a href="{% url 'literature:delete_subsection' subsection.id %}" onclick="return confirm('Delete this subsection and all its content?')">🗑️ Delete</a>
+                                    <a href="{% url 'literature:add_subsubsection' %}?subsection={{ subsection.id }}">➕ Add SubSubsection</a>
+                                    <a href="{% url 'literature:add_code' %}?subsection={{ subsection.id }}">💻 Add Code</a>
+                                    <a href="{% url 'literature:add_note' %}?subsection={{ subsection.id }}" class="note-link">📝 Add Note</a>
+                                    {% if subsection.codes.count > 0 %}<a href="{% url 'literature:view_codes' %}?subsection={{ subsection.id }}" class="view-codes-link">👁️ View Codes</a>{% endif %}
+                                </div>
+
+                                <ul class="subsubsection-list" id="subsubsection-list-{{ subsection.id }}" data-subsection-id="{{ subsection.id }}">
+                                {% for subsubsection in subsection.subsubsections.all %}
+                                    <li class="draggable-subsubsection" data-subsubsection-id="{{ subsubsection.id }}">
+                                        <b>SubSubsection: {{ subsubsection.subsubsection_name }}</b>
+                                        {% if subsubsection.codes.count > 0 %}<span class="code-count">{{ subsubsection.codes.count }} code(s)</span>{% endif %}
+                                        {% if subsubsection.notes.count > 0 %}<span class="note-count">{{ subsubsection.notes.count }} note(s)</span>{% endif %}
+                                        <br><small>{{ subsubsection.subsubsection_introduction }}</small>
+
+                                        {% if subsubsection.notes.exists %}
+                                        <ul class="note-list" id="note-list-subsubsection-{{ subsubsection.id }}">
+                                        {% for note in subsubsection.notes.all %}
+                                            <li class="draggable-note" data-note-id="{{ note.id }}">
+                                                {% if note.title %}<div class="note-title">📝 {{ note.title }}</div>{% endif %}
+                                                <div class="note-body">{{ note.content|json_script:note.id }}</div>
+                                                <div class="note-actions">
+                                                    <a href="{% url 'literature:edit_note' note.id %}">✏️ Edit Note</a>
+                                                    <a href="{% url 'literature:delete_note' note.id %}" class="del" onclick="return confirm('Delete this note?')">🗑️ Delete</a>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                        </ul>
+                                        {% endif %}
+
+                                        <div class="action-links">
+                                            <a href="{% url 'literature:update_subsubsection' subsubsection.id %}">✏️ Edit</a>
+                                            <a href="{% url 'literature:delete_subsubsection' subsubsection.id %}" onclick="return confirm('Delete this subsubsection?')">🗑️ Delete</a>
+                                            <a href="{% url 'literature:add_code' %}?subsubsection={{ subsubsection.id }}">💻 Add Code</a>
+                                            <a href="{% url 'literature:add_note' %}?subsubsection={{ subsubsection.id }}" class="note-link">📝 Add Note</a>
+                                            {% if subsubsection.codes.count > 0 %}<a href="{% url 'literature:view_codes' %}?subsubsection={{ subsubsection.id }}" class="view-codes-link">👁️ View Codes</a>{% endif %}
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                                </ul>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+        </ul>
+
+    <script>
+    function getCookie(name) {
+        let v = null;
+        document.cookie.split(';').forEach(c => {
+            c = c.trim();
+            if (c.startsWith(name + '=')) v = decodeURIComponent(c.slice(name.length + 1));
+        });
+        return v;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    function escapeHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function applyMarks(text, marks) {
+        if (!marks || !marks.length) return escapeHtml(text);
+        let r = escapeHtml(text);
+        marks.forEach(m => {
+            if (m.type === 'bold')   r = `<strong>${r}</strong>`;
+            if (m.type === 'italic') r = `<em>${r}</em>`;
+        });
+        return r;
+    }
+
+    function renderChildren(node) {
+        if (!node || !node.content) return '';
+        return node.content.map(renderNode).join('');
+    }
+
+    function renderNode(node) {
+        if (!node) return '';
+        switch (node.type) {
+            case 'doc':            return renderChildren(node);
+            case 'paragraph':      return `<p>${renderChildren(node)}</p>`;
+            case 'text':           return applyMarks(node.text || '', node.marks);
+            case 'hardBreak':      return '<br>';
+            case 'bulletList':     return `<ul>${renderChildren(node)}</ul>`;
+            case 'orderedList':    return `<ol>${renderChildren(node)}</ol>`;
+            case 'listItem':       return `<li>${renderChildren(node)}</li>`;
+            case 'heading': {
+                const l = (node.attrs && node.attrs.level) || 1;
+                return `<h${l}>${renderChildren(node)}</h${l}>`;
+            }
+            case 'image':
+            case 'resizableImage': {
+                const a   = node.attrs || {};
+                const src = a.src    ? escapeHtml(a.src)         : '';
+                const alt = a.alt    ? escapeHtml(a.alt)         : '';
+                const w   = a.width  ? ` width="${a.width}"`     : '';
+                const h   = a.height ? ` height="${a.height}"`   : '';
+                return `<img src="${src}" alt="${alt}"${w}${h} class="tiptap-image">`;
+            }
+            case 'latex': {
+                const latex   = (node.attrs && node.attrs.latex)   || '';
+                const display = (node.attrs && node.attrs.display) || false;
+                const wrap    = document.createElement(display ? 'div' : 'span');
+                wrap.className = display ? 'latex-block' : 'latex-inline';
+                try { katex.render(latex, wrap, { throwOnError: false, displayMode: !!display }); }
+                catch(e) { wrap.textContent = latex; }
+                return wrap.outerHTML;
+            }
+            default: return renderChildren(node);
+        }
+    }
+
+    document.querySelectorAll('.note-body').forEach(bodyEl => {
+        const scriptEl = bodyEl.querySelector('script[type="application/json"]');
+        if (!scriptEl) {
+            bodyEl.innerHTML = '<span class="note-error">(no content)</span>';
+            return;
+        }
+
+        let json;
+        try {
+            json = JSON.parse(scriptEl.textContent);
+        } catch(e) {
+            bodyEl.innerHTML = '<span class="note-error">(invalid content)</span>';
+            console.warn('Note JSON parse error:', e, scriptEl.textContent);
+            return;
+        }
+
+        if (typeof json === 'string') {
+            try { json = JSON.parse(json); } catch(e) { }
+        }
+
+        if (!json || typeof json !== 'object') {
+            bodyEl.innerHTML = '<span class="note-error">(empty note)</span>';
+            return;
+        }
+
+        try {
+            let html = '';
+            if (json.type === 'doc') {
+                html = renderNode(json);
+            } else if (Array.isArray(json.content)) {
+                html = json.content.map(renderNode).join('');
+            } else {
+                html = '<span class="note-error">(unrecognised format)</span>';
+            }
+            bodyEl.innerHTML = html;
+        } catch(e) {
+            bodyEl.innerHTML = '<span class="note-error">(render error)</span>';
+            console.warn('Note render error:', e);
+        }
+    });
+
+    document.querySelectorAll('.note-list').forEach(list => {
+        new Sortable(list, {
+            animation: 150, ghostClass: 'sortable-ghost', handle: '.draggable-note',
+            onEnd() {
+                const ids = Array.from(list.children).map(li => li.getAttribute('data-note-id'));
+                fetch("{% url 'literature:reorder_notes' %}", {
+                    method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrftoken},
+                    body: JSON.stringify({ note_ids: ids })
+                });
+            }
+        });
+    });
+
+    document.querySelectorAll('.chapter-list').forEach(list => {
+        new Sortable(list, {
+            animation:150, ghostClass:'sortable-ghost', handle:'.draggable-chapter',
+            onEnd() {
+                const ids = Array.from(list.children).map(li=>li.getAttribute('data-chapter-id'));
+                fetch("{% url 'literature:reorder_chapters' %}", {
+                    method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrftoken},
+                    body: JSON.stringify({ chapter_ids: ids })
+                });
+            }
+        });
+    });
+
+    document.querySelectorAll('.section-list').forEach(list => {
+        new Sortable(list, {
+            animation:150, ghostClass:'sortable-ghost', handle:'.draggable-section',
+            onEnd() {
+                const ids = Array.from(list.children).map(li=>li.getAttribute('data-section-id'));
+                fetch("{% url 'literature:reorder_sections' %}", {
+                    method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrftoken},
+                    body: JSON.stringify({ section_ids: ids })
+                });
+            }
+        });
+    });
+
+    document.querySelectorAll('.subsection-list').forEach(list => {
+        new Sortable(list, {
+            animation:150, ghostClass:'sortable-ghost', handle:'.draggable-subsection',
+            onEnd() {
+                const ids = Array.from(list.children).map(li=>li.getAttribute('data-subsection-id'));
+                fetch("{% url 'literature:reorder_subsections' %}", {
+                    method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrftoken},
+                    body: JSON.stringify({ subsection_ids: ids })
+                });
+            }
+        });
+    });
+
+    document.querySelectorAll('.subsubsection-list').forEach(list => {
+        new Sortable(list, {
+            animation:150, ghostClass:'sortable-ghost', handle:'.draggable-subsubsection',
+            onEnd() {
+                const ids = Array.from(list.children).map(li=>li.getAttribute('data-subsubsection-id'));
+                fetch("{% url 'literature:reorder_subsubsections' %}", {
+                    method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrftoken},
+                    body: JSON.stringify({ subsubsection_ids: ids })
+                });
+            }
+        });
+    });
+    </script>
+</div>
+</body>
+</html>

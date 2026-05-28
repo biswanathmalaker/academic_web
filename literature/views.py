@@ -8,13 +8,21 @@ from .forms import BookForm, ChapterForm, SectionForm, SubsectionForm, SubSubsec
 
 
 def index(request):
-    books = Book.objects.prefetch_related(
-        'chapters__notes',
-        'chapters__sections__notes',
-        'chapters__sections__subsections__notes',
-        'chapters__sections__subsections__subsubsections__notes',
-    ).all().order_by('order')
+    books = Book.objects.all().order_by('order')
     return render(request, 'literature/index.html', {'books': books})
+
+
+def book_detail(request, pk):
+    book = get_object_or_404(
+        Book.objects.prefetch_related(
+            'chapters__notes',
+            'chapters__sections__notes',
+            'chapters__sections__subsections__notes',
+            'chapters__sections__subsections__subsubsections__notes',
+        ),
+        pk=pk,
+    )
+    return render(request, 'literature/book_detail.html', {'book': book})
 
 
 # ----- Book -----
